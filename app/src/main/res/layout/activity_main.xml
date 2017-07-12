@@ -6,10 +6,32 @@
     android:layout_height="match_parent"
     tools:context="top.defaults.pickerviewapp.MainActivity">
 
-    <top.defaults.view.PickerView
-        android:id="@+id/pickerView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#e7e7e7"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <top.defaults.view.PickerView
+            android:id="@+id/pickerView1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#e7e7e7"/>
+
+        <top.defaults.view.PickerView
+            android:id="@+id/pickerView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#e7e7e7"/>
+
+        <top.defaults.view.PickerView
+            android:id="@+id/pickerView3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#e7e7e7"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

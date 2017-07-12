@@ -5,8 +5,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -21,10 +23,10 @@ public class PickerView extends View {
 
     private static final String TAG = "PickerView";
 
-    private static final int DEFAULT_MAX_OFFSET_ITEM = 2;
-    private int preferredMaxOffsetItem = DEFAULT_MAX_OFFSET_ITEM;
-    private int maxOffsetItem = preferredMaxOffsetItem;
-    private int selectedItem = 0;
+    private static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 2;
+    private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
+    private int maxOffsetItemCount = preferredMaxOffsetItemCount;
+    private int selectedItemPosition = 0;
 
     private Adapter adapter;
 
@@ -41,6 +43,7 @@ public class PickerView extends View {
     private int maxY;
     private int maxOverScrollY;
 
+    private Drawable selectedItemDrawable;
     private int[] DEFAULT_GRADIENT_COLORS = new int[]{0xcffafafa, 0x9ffafafa, 0x5ffafafa};
     private int[] gradientColors = DEFAULT_GRADIENT_COLORS;
     private GradientDrawable topMask;
@@ -82,6 +85,7 @@ public class PickerView extends View {
         });
         scroller = new OverScroller(getContext());
 
+        selectedItemDrawable = ContextCompat.getDrawable(getContext(), R.drawable.top_defaults_view_pickerview_selected_item);
         topMask = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors);
         bottomMask = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, gradientColors);
 
@@ -96,8 +100,8 @@ public class PickerView extends View {
         textPaint.setAntiAlias(true);
     }
 
-    public void setPreferredMaxOffsetItem(int preferredMaxOffsetItem) {
-        this.preferredMaxOffsetItem = preferredMaxOffsetItem;
+    public void setPreferredMaxOffsetItemCount(int preferredMaxOffsetItemCount) {
+        this.preferredMaxOffsetItemCount = preferredMaxOffsetItemCount;
     }
 
     public void setAdapter(final Adapter adapter) {
@@ -115,20 +119,40 @@ public class PickerView extends View {
         protected abstract String getText(int index);
     }
 
+    public int getSelectedItemPosition() {
+        return selectedItemPosition;
+    }
+
+    public interface OnSelectedItemChangedListener {
+        void onSelectedItemChanged(int selectedItemPosition);
+    }
+
+    private OnSelectedItemChangedListener onSelectedItemChangedListener;
+
+    public void setOnSelectedItemChangedListener(OnSelectedItemChangedListener onSelectedItemChangedListener) {
+        this.onSelectedItemChangedListener = onSelectedItemChangedListener;
+    }
+
+    private void notifySelectedItemChanged(int newSelectedItemPosition) {
+        if (onSelectedItemChangedListener != null) {
+            onSelectedItemChangedListener.onSelectedItemChanged(newSelectedItemPosition);
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         checkNotNull(adapter, "adapter == null");
 
         int itemHeight = adapter.getItemHeight();
-        int height = resolveSizeAndState((1 + 2 * preferredMaxOffsetItem) * itemHeight, heightMeasureSpec, 0);
+        int height = resolveSizeAndState((1 + 2 * preferredMaxOffsetItemCount) * itemHeight, heightMeasureSpec, 0);
         int realHeight = height & ~View.MEASURED_STATE_MASK;
 
-        maxOffsetItem = (int) Math.ceil((realHeight / adapter.getItemHeight() - 1) / 2.f);
+        maxOffsetItemCount = (int) Math.ceil((realHeight / adapter.getItemHeight() - 1) / 2.f);
         computeYOffset();
-        minY = -(adapter.getItemCount() - 1 - maxOffsetItem) * adapter.getItemHeight();
-        maxY = maxOffsetItem * adapter.getItemHeight();
-        maxOverScrollY = (maxOffsetItem > 3 ? 3 : maxOffsetItem) * adapter.getItemHeight();
+        minY = -(adapter.getItemCount() - 1 - maxOffsetItemCount) * adapter.getItemHeight();
+        maxY = maxOffsetItemCount * adapter.getItemHeight();
+        maxOverScrollY = (maxOffsetItemCount > 3 ? 3 : maxOffsetItemCount) * adapter.getItemHeight();
 
         setMeasuredDimension(widthMeasureSpec, height);
     }
@@ -138,13 +162,11 @@ public class PickerView extends View {
         super.onDraw(canvas);
         checkNotNull(adapter, "adapter == null");
 
+        selectedItemDrawable.setBounds(0, maxOffsetItemCount * adapter.getItemHeight(), getMeasuredWidth(), (maxOffsetItemCount + 1) * adapter.getItemHeight());
+        selectedItemDrawable.draw(canvas);
+
         drawItems(canvas);
-
-        topMask.setBounds(0, 0, getMeasuredWidth(), maxOffsetItem * adapter.getItemHeight());
-        topMask.draw(canvas);
-
-        bottomMask.setBounds(0, (maxOffsetItem + 1) * adapter.getItemHeight(), getMeasuredWidth(), getMeasuredHeight());
-        bottomMask.draw(canvas);
+        drawMasks(canvas);
     }
 
     private void drawItems(Canvas canvas) {
@@ -152,12 +174,12 @@ public class PickerView extends View {
 
         int itemHeight = adapter.getItemHeight();
         double drawYOffset = this.yOffset;
-        if (selectedItem > maxOffsetItem) {
-            drawYOffset += (selectedItem - maxOffsetItem) * itemHeight;
+        if (selectedItemPosition > maxOffsetItemCount) {
+            drawYOffset += (selectedItemPosition - maxOffsetItemCount) * itemHeight;
         }
 
-        int start = selectedItem - maxOffsetItem;
-        int end = selectedItem + maxOffsetItem + 1;
+        int start = selectedItemPosition - maxOffsetItemCount;
+        int end = selectedItemPosition + maxOffsetItemCount + 1;
 
         // 绘制最上方的一个仅显示一部分的item
         if (start > 0) {
@@ -189,6 +211,14 @@ public class PickerView extends View {
 
             drawYOffset += itemHeight;
         }
+    }
+
+    private void drawMasks(Canvas canvas) {
+        topMask.setBounds(0, 0, getMeasuredWidth(), maxOffsetItemCount * adapter.getItemHeight());
+        topMask.draw(canvas);
+
+        bottomMask.setBounds(0, (maxOffsetItemCount + 1) * adapter.getItemHeight(), getMeasuredWidth(), getMeasuredHeight());
+        bottomMask.draw(canvas);
     }
 
     @Override
@@ -229,9 +259,6 @@ public class PickerView extends View {
     public void computeScroll() {
         if (scroller.computeScrollOffset()) {
             yOffset = scroller.getCurrY();
-
-            Log.d(TAG, "computeScroll yOffset: " + yOffset);
-
             clampYOffset(maxOverScrollY);
             invalidate();
         } else {
@@ -246,13 +273,16 @@ public class PickerView extends View {
 
     private void updateSelectedItem() {
         float centerPosition = centerPosition();
-        selectedItem = (int) Math.floor(centerPosition);
-        Log.d(TAG, "selectedItem: " + selectedItem);
+        int newSelectedItemPosition = (int) Math.floor(centerPosition);
+        if (clampItemPosition(selectedItemPosition) != clampItemPosition(newSelectedItemPosition)) {
+            notifySelectedItemChanged(clampItemPosition(newSelectedItemPosition));
+        }
+        selectedItemPosition = newSelectedItemPosition;
     }
 
     // 计算selectedItem的offset
     private void computeYOffset() {
-        yOffset = (maxOffsetItem - selectedItem) * adapter.getItemHeight();
+        yOffset = (maxOffsetItemCount - selectedItemPosition) * adapter.getItemHeight();
     }
 
     private void clampYOffset(int overY) {
@@ -260,8 +290,8 @@ public class PickerView extends View {
         int itemHeight = adapter.getItemHeight();
         int itemCount = adapter.getItemCount();
 
-        double maxYOffset = maxOffsetItem * itemHeight + overY;
-        double minYOffset = ((double) (maxOffsetItem - itemCount + 1)) * itemHeight - overY;
+        double maxYOffset = maxOffsetItemCount * itemHeight + overY;
+        double minYOffset = ((double) (maxOffsetItemCount - itemCount + 1)) * itemHeight - overY;
 
         if (yOffset > maxYOffset) {
             yOffset = maxYOffset;
@@ -277,15 +307,19 @@ public class PickerView extends View {
         float centerPosition = centerPosition();
         int centerItem = (int) Math.floor(centerPosition);
 
-        if (centerItem < 0) centerItem = 0;
-        else if (centerItem >= adapter.getItemCount()) centerItem = adapter.getItemCount() - 1;
+        centerItem = clampItemPosition(centerItem);
+        return (maxOffsetItemCount - centerItem) * adapter.getItemHeight();
+    }
 
-        return (maxOffsetItem - centerItem) * adapter.getItemHeight();
+    private int clampItemPosition(int itemPosition) {
+        if (itemPosition < 0) itemPosition = 0;
+        else if (itemPosition >= adapter.getItemCount()) itemPosition = adapter.getItemCount() - 1;
+        return itemPosition;
     }
 
     // 中心线切割的单元位置
     private float centerPosition() {
-        return (float) (maxOffsetItem + 0.5 - yOffset / adapter.getItemHeight());
+        return (float) (maxOffsetItemCount + 0.5 - yOffset / adapter.getItemHeight());
     }
 
     private boolean justify(int duration) {
