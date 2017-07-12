@@ -5,7 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.Nullable;
+import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -20,24 +22,31 @@ public class PickerView extends View {
     private static final String TAG = "PickerView";
 
     private static final int DEFAULT_MAX_OFFSET_ITEM = 2;
-    private int maxOffsetItem = DEFAULT_MAX_OFFSET_ITEM;
+    private int preferredMaxOffsetItem = DEFAULT_MAX_OFFSET_ITEM;
+    private int maxOffsetItem = preferredMaxOffsetItem;
     private int selectedItem = 0;
 
     private Adapter adapter;
 
     private Paint textPaint;
-    private Paint selectedTextPaint;
-    private Paint backgroundPaint;
     private int textSize;
     private Rect textBounds = new Rect();
 
     private GestureDetector gestureDetector;
     private OverScroller scroller;
+    private boolean pendingJustify;
     private float previousTouchedY;
-    private float yOffset;
+    private double yOffset;
     private int minY;
     private int maxY;
     private int maxOverScrollY;
+
+    private int[] DEFAULT_GRADIENT_COLORS = new int[]{0xcffafafa, 0x9ffafafa, 0x5ffafafa};
+    private int[] gradientColors = DEFAULT_GRADIENT_COLORS;
+    private GradientDrawable topMask;
+    private GradientDrawable bottomMask;
+
+    private Layout.Alignment textAlign = Layout.Alignment.ALIGN_CENTER;
 
     public PickerView(Context context) {
         this(context, null);
@@ -66,10 +75,15 @@ public class PickerView extends View {
                         maxY,
                         0, maxOverScrollY);
                 Log.d(TAG, "fling: " + yOffset + ", velocityY: " + velocityY);
+
+                pendingJustify = true;
                 return true;
             }
         });
         scroller = new OverScroller(getContext());
+
+        topMask = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors);
+        bottomMask = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, gradientColors);
 
         textSize = Utils.pixelOfScaled(getContext(), 14);
         initPaints();
@@ -80,28 +94,19 @@ public class PickerView extends View {
         textPaint.setColor(Color.BLACK);
         textPaint.setTextSize(textSize);
         textPaint.setAntiAlias(true);
-
-        selectedTextPaint = new Paint();
-        selectedTextPaint.setColor(Color.WHITE);
-        selectedTextPaint.setTextSize(textSize);
-        selectedTextPaint.setAntiAlias(true);
-
-        backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.GRAY);
     }
 
-    public void setMaxOffsetItem(int maxOffsetItem) {
-        this.maxOffsetItem = maxOffsetItem;
+    public void setPreferredMaxOffsetItem(int preferredMaxOffsetItem) {
+        this.preferredMaxOffsetItem = preferredMaxOffsetItem;
     }
 
     public void setAdapter(final Adapter adapter) {
         checkNotNull(adapter, "adapter == null");
+        if (adapter.getItemCount() > Integer.MAX_VALUE / adapter.getItemHeight()) {
+            Log.w(TAG, "getItemCount() is too large, unsupported yet");
+        }
 
         this.adapter = adapter;
-        yOffset = computeYOffset();
-        minY = -(adapter.getItemCount() - 1 - maxOffsetItem) * adapter.getItemHeight();
-        maxY = maxOffsetItem * adapter.getItemHeight();
-        maxOverScrollY = maxOffsetItem * adapter.getItemHeight();
     }
 
     public abstract static class Adapter {
@@ -116,9 +121,16 @@ public class PickerView extends View {
         checkNotNull(adapter, "adapter == null");
 
         int itemHeight = adapter.getItemHeight();
-        int height = resolveSizeAndState((1 + 2 * maxOffsetItem) * itemHeight, heightMeasureSpec, 0);
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        setMeasuredDimension(width, height);
+        int height = resolveSizeAndState((1 + 2 * preferredMaxOffsetItem) * itemHeight, heightMeasureSpec, 0);
+        int realHeight = height & ~View.MEASURED_STATE_MASK;
+
+        maxOffsetItem = (int) Math.ceil((realHeight / adapter.getItemHeight() - 1) / 2.f);
+        computeYOffset();
+        minY = -(adapter.getItemCount() - 1 - maxOffsetItem) * adapter.getItemHeight();
+        maxY = maxOffsetItem * adapter.getItemHeight();
+        maxOverScrollY = (maxOffsetItem > 3 ? 3 : maxOffsetItem) * adapter.getItemHeight();
+
+        setMeasuredDimension(widthMeasureSpec, height);
     }
 
     @Override
@@ -126,10 +138,20 @@ public class PickerView extends View {
         super.onDraw(canvas);
         checkNotNull(adapter, "adapter == null");
 
+        drawItems(canvas);
+
+        topMask.setBounds(0, 0, getMeasuredWidth(), maxOffsetItem * adapter.getItemHeight());
+        topMask.draw(canvas);
+
+        bottomMask.setBounds(0, (maxOffsetItem + 1) * adapter.getItemHeight(), getMeasuredWidth(), getMeasuredHeight());
+        bottomMask.draw(canvas);
+    }
+
+    private void drawItems(Canvas canvas) {
         updateSelectedItem();
 
         int itemHeight = adapter.getItemHeight();
-        float drawYOffset = this.yOffset;
+        double drawYOffset = this.yOffset;
         if (selectedItem > maxOffsetItem) {
             drawYOffset += (selectedItem - maxOffsetItem) * itemHeight;
         }
@@ -152,12 +174,19 @@ public class PickerView extends View {
 
             String text = adapter.getText(i);
             textPaint.getTextBounds(text, 0, text.length(), textBounds);
-            canvas.drawLine(0, drawYOffset + itemHeight, getMeasuredWidth(), drawYOffset + itemHeight, backgroundPaint);
-            if (i == selectedItem) {
-                canvas.drawText(text, 0, drawYOffset + (itemHeight + (textBounds.height())) / 2, selectedTextPaint);
+            float textBottom = (float) drawYOffset + (itemHeight + (textBounds.height())) / 2;
+
+            if (textAlign == Layout.Alignment.ALIGN_CENTER) {
+                textPaint.setTextAlign(Paint.Align.CENTER);
+                canvas.drawText(text, getMeasuredWidth() / 2, textBottom, textPaint);
+            } else if (textAlign == Layout.Alignment.ALIGN_OPPOSITE) {
+                textPaint.setTextAlign(Paint.Align.RIGHT);
+                canvas.drawText(text, getMeasuredWidth(), textBottom, textPaint);
             } else {
-                canvas.drawText(text, 0, drawYOffset + (itemHeight + (textBounds.height())) / 2, textPaint);
+                textPaint.setTextAlign(Paint.Align.LEFT);
+                canvas.drawText(text, 0, textBottom, textPaint);
             }
+
             drawYOffset += itemHeight;
         }
     }
@@ -172,6 +201,9 @@ public class PickerView extends View {
         float dy;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (!scroller.isFinished()) {
+                    scroller.forceFinished(true);
+                }
                 previousTouchedY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -185,13 +217,7 @@ public class PickerView extends View {
                 // align items
                 dy = event.getY() - previousTouchedY;
                 yOffset += dy;
-                int finalY = computeFinalYOffset();
-                scroller.startScroll(
-                        0, (int) yOffset,
-                        0, (int) (finalY - yOffset),
-                        500);
-
-                Log.d(TAG, "startScroll: " + yOffset + ", to: " + finalY);
+                justify(500);
                 break;
         }
 
@@ -204,10 +230,17 @@ public class PickerView extends View {
         if (scroller.computeScrollOffset()) {
             yOffset = scroller.getCurrY();
 
-            Log.d(TAG, "yOffset: " + yOffset);
+            Log.d(TAG, "computeScroll yOffset: " + yOffset);
 
             clampYOffset(maxOverScrollY);
             invalidate();
+        } else {
+            if (pendingJustify) {
+                if (justify(250)) {
+                    invalidate();
+                }
+                pendingJustify = false;
+            }
         }
     }
 
@@ -218,19 +251,23 @@ public class PickerView extends View {
     }
 
     // 计算selectedItem的offset
-    private int computeYOffset() {
-        return (maxOffsetItem - selectedItem) * adapter.getItemHeight();
+    private void computeYOffset() {
+        yOffset = (maxOffsetItem - selectedItem) * adapter.getItemHeight();
     }
 
     private void clampYOffset(int overY) {
         boolean clamped = false;
         int itemHeight = adapter.getItemHeight();
         int itemCount = adapter.getItemCount();
-        if (yOffset > maxOffsetItem * itemHeight + overY) {
-            yOffset = maxOffsetItem * itemHeight + overY;
+
+        double maxYOffset = maxOffsetItem * itemHeight + overY;
+        double minYOffset = ((double) (maxOffsetItem - itemCount + 1)) * itemHeight - overY;
+
+        if (yOffset > maxYOffset) {
+            yOffset = maxYOffset;
             clamped = true;
-        } else if (yOffset < (maxOffsetItem - itemCount + 1) * itemHeight - overY) {
-            yOffset = (maxOffsetItem - itemCount + 1) * itemHeight - overY;
+        } else if (yOffset < minYOffset) {
+            yOffset = minYOffset;
             clamped = true;
         }
         if (clamped) scroller.forceFinished(true);
@@ -249,5 +286,20 @@ public class PickerView extends View {
     // 中心线切割的单元位置
     private float centerPosition() {
         return (float) (maxOffsetItem + 0.5 - yOffset / adapter.getItemHeight());
+    }
+
+    private boolean justify(int duration) {
+        int finalY = computeFinalYOffset();
+        if (finalY != yOffset) {
+            scroller.startScroll(
+                    0, (int) yOffset,
+                    0, (int) (finalY - yOffset),
+                    duration);
+
+            Log.d(TAG, "startScroll: " + yOffset + ", to: " + finalY);
+            return true;
+        }
+
+        return false;
     }
 }

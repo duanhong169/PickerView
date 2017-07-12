@@ -13,12 +13,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         PickerView pickerView = (PickerView) findViewById(R.id.pickerView);
-        pickerView.setMaxOffsetItem(3);
+        pickerView.setPreferredMaxOffsetItem(4);
         pickerView.setAdapter(new PickerView.Adapter() {
 
             @Override
             protected int getItemCount() {
-                return 10;
+                return Integer.MAX_VALUE / getItemHeight();
             }
 
             @Override
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected String getText(int index) {
-                return "选项 " + index;
+                return "Item " + index;
             }
         });
     }
