@@ -20,6 +20,7 @@
             android:layout_weight="1"
             app:preferredMaxOffsetItemCount="4"
             app:textSize="22sp"
+            app:textColor="@color/colorAccent"
             app:isCyclic="true"
             android:background="#e7e7e7"/>
 
@@ -30,6 +31,7 @@
             android:layout_weight="1"
             app:preferredMaxOffsetItemCount="4"
             app:textSize="20sp"
+            app:textColor="@color/colorPrimary"
             app:isCyclic="true"
             android:background="#e7e7e7"/>
 
@@ -40,6 +42,7 @@
             android:layout_weight="1"
             app:preferredMaxOffsetItemCount="4"
             app:textSize="18sp"
+            app:textColor="@color/colorPrimaryDark"
             app:isCyclic="true"
             android:background="#e7e7e7"/>
 

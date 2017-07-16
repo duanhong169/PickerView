@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Layout;
@@ -47,7 +48,9 @@ public class PickerView extends View {
 
     private int itemHeight;
     private int textSize;
+    private @ColorInt int textColor = Color.BLACK;
     private boolean isCyclic;
+    private boolean autoFitSize;
     private Drawable selectedItemDrawable;
     private int[] DEFAULT_GRADIENT_COLORS = new int[]{0xcffafafa, 0x9ffafafa, 0x5ffafafa};
     private int[] gradientColors = DEFAULT_GRADIENT_COLORS;
@@ -103,8 +106,10 @@ public class PickerView extends View {
 
         int defaultTextSize = Utils.pixelOfScaled(getContext(), 22);
         textSize = typedArray.getDimensionPixelSize(R.styleable.PickerView_textSize, defaultTextSize);
+        textColor = typedArray.getColor(R.styleable.PickerView_textColor, Color.BLACK);
 
         isCyclic = typedArray.getBoolean(R.styleable.PickerView_isCyclic, false);
+        autoFitSize = typedArray.getBoolean(R.styleable.PickerView_autoFitSize, true);
         typedArray.recycle();
 
         initPaints();
@@ -112,8 +117,8 @@ public class PickerView extends View {
 
     private void initPaints() {
         textPaint = new Paint();
-        textPaint.setColor(Color.BLACK);
         textPaint.setTextSize(textSize);
+        textPaint.setColor(textColor);
         textPaint.setAntiAlias(true);
     }
 
@@ -265,7 +270,16 @@ public class PickerView extends View {
     }
 
     private void drawText(Canvas canvas, String text, float offset) {
+        textPaint.setTextSize(textSize);
         textPaint.getTextBounds(text, 0, text.length(), textBounds);
+
+        if (autoFitSize) {
+            while (getMeasuredWidth() < textBounds.width() && textPaint.getTextSize() > 16) {
+                textPaint.setTextSize(textPaint.getTextSize() - 1);
+                textPaint.getTextBounds(text, 0, text.length(), textBounds);
+            }
+        }
+
         float textBottom = offset + (itemHeight + (textBounds.height())) / 2;
 
         if (textAlign == Layout.Alignment.ALIGN_CENTER) {
