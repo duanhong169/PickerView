@@ -187,15 +187,21 @@ public class PickerView extends View {
     private void notifySelectedItemChangedIfNeeded(int newSelectedItemPosition) {
         int clampedNewSelectedItemPosition = clampItemPosition(newSelectedItemPosition);
 
-        if (clampItemPosition(selectedItemPosition) != clampedNewSelectedItemPosition) {
-            if (isCyclic) {
+        boolean changed = false;
+        if (isCyclic) {
+            if (selectedItemPosition != newSelectedItemPosition) {
                 selectedItemPosition = newSelectedItemPosition;
-            } else {
+                changed = true;
+            }
+        } else {
+            if (selectedItemPosition != clampedNewSelectedItemPosition) {
                 selectedItemPosition = clampedNewSelectedItemPosition;
+                changed = true;
             }
-            if (onSelectedItemChangedListener != null) {
-                onSelectedItemChangedListener.onSelectedItemChanged(this, clampedNewSelectedItemPosition);
-            }
+        }
+
+        if (changed && onSelectedItemChangedListener != null) {
+            onSelectedItemChangedListener.onSelectedItemChanged(this, clampedNewSelectedItemPosition);
         }
     }
 
@@ -320,7 +326,7 @@ public class PickerView extends View {
                 // align items
                 dy = event.getY() - previousTouchedY;
                 yOffset += dy;
-                justify(500);
+                justify(250);
                 break;
         }
 
