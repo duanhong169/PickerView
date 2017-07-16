@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PickerView">
+        <attr name="preferredMaxOffsetItemCount" format="integer" />
+        <attr name="itemHeight" format="dimension" />
+        <attr name="textSize" format="dimension" />
+        <attr name="isCyclic" format="boolean" />
+    </declare-styleable>
+</resources>

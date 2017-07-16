@@ -1,6 +1,7 @@
 package top.defaults.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -27,13 +28,12 @@ public class PickerView extends View {
 
     private static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
     private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
-    private int maxOffsetItemCount = preferredMaxOffsetItemCount;
+    private int maxOffsetItemCount;
     private int selectedItemPosition = 0;
 
     private Adapter adapter;
 
     private Paint textPaint;
-    private int textSize;
     private Rect textBounds = new Rect();
 
     private GestureDetector gestureDetector;
@@ -45,13 +45,14 @@ public class PickerView extends View {
     private int maxY;
     private int maxOverScrollY;
 
-    private boolean isCyclic = false;
+    private int itemHeight;
+    private int textSize;
+    private boolean isCyclic;
     private Drawable selectedItemDrawable;
     private int[] DEFAULT_GRADIENT_COLORS = new int[]{0xcffafafa, 0x9ffafafa, 0x5ffafafa};
     private int[] gradientColors = DEFAULT_GRADIENT_COLORS;
     private GradientDrawable topMask;
     private GradientDrawable bottomMask;
-
     private Layout.Alignment textAlign = Layout.Alignment.ALIGN_CENTER;
 
     public PickerView(Context context) {
@@ -64,10 +65,10 @@ public class PickerView extends View {
 
     public PickerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
-    private void init() {
+    private void init(Context context, AttributeSet attrs) {
         gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -92,7 +93,20 @@ public class PickerView extends View {
         topMask = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors);
         bottomMask = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, gradientColors);
 
-        textSize = Utils.pixelOfScaled(getContext(), 22);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.PickerView);
+        preferredMaxOffsetItemCount = typedArray.getInt(R.styleable.PickerView_preferredMaxOffsetItemCount, DEFAULT_MAX_OFFSET_ITEM_COUNT);
+        if (preferredMaxOffsetItemCount <= 0) preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
+
+        int defaultItemHeight = Utils.pixelOfDp(getContext(), 32);
+        itemHeight = typedArray.getDimensionPixelSize(R.styleable.PickerView_itemHeight, defaultItemHeight);
+        if (itemHeight <= 0) itemHeight = defaultItemHeight;
+
+        int defaultTextSize = Utils.pixelOfScaled(getContext(), 22);
+        textSize = typedArray.getDimensionPixelSize(R.styleable.PickerView_textSize, defaultTextSize);
+
+        isCyclic = typedArray.getBoolean(R.styleable.PickerView_isCyclic, false);
+        typedArray.recycle();
+
         initPaints();
     }
 
@@ -103,17 +117,13 @@ public class PickerView extends View {
         textPaint.setAntiAlias(true);
     }
 
-    public void setPreferredMaxOffsetItemCount(int preferredMaxOffsetItemCount) {
-        this.preferredMaxOffsetItemCount = preferredMaxOffsetItemCount;
-    }
-
     public Adapter getAdapter() {
         return adapter;
     }
 
     public void setAdapter(final Adapter adapter) {
         checkNotNull(adapter, "adapter == null");
-        if (adapter.getItemCount() > Integer.MAX_VALUE / adapter.getItemHeight()) {
+        if (adapter.getItemCount() > Integer.MAX_VALUE / itemHeight) {
             Log.w(TAG, "getItemCount() is too large, unsupported yet");
         }
 
@@ -134,6 +144,9 @@ public class PickerView extends View {
                 if (pickerView != null) {
                     pickerView.updateSelectedItem();
                     pickerView.computeScrollParams();
+                    if (!pickerView.scroller.isFinished()) {
+                        pickerView.scroller.forceFinished(true);
+                    }
                     pickerView.justify(0);
                     pickerView.invalidate();
                 }
@@ -141,12 +154,11 @@ public class PickerView extends View {
         }
 
         public abstract int getItemCount();
-        public abstract int getItemHeight();
         public abstract String getText(int index);
     }
 
     public int getSelectedItemPosition() {
-        return selectedItemPosition;
+        return clampItemPosition(selectedItemPosition);
     }
 
     public void setSelectedItemPosition(int selectedItemPosition) {
@@ -168,12 +180,16 @@ public class PickerView extends View {
     }
 
     private void notifySelectedItemChangedIfNeeded(int newSelectedItemPosition) {
-        newSelectedItemPosition = clampItemPosition(newSelectedItemPosition);
+        int clampedNewSelectedItemPosition = clampItemPosition(newSelectedItemPosition);
 
-        if (selectedItemPosition != newSelectedItemPosition) {
-            selectedItemPosition = newSelectedItemPosition;
+        if (clampItemPosition(selectedItemPosition) != clampedNewSelectedItemPosition) {
+            if (isCyclic) {
+                selectedItemPosition = newSelectedItemPosition;
+            } else {
+                selectedItemPosition = clampedNewSelectedItemPosition;
+            }
             if (onSelectedItemChangedListener != null) {
-                onSelectedItemChangedListener.onSelectedItemChanged(this, newSelectedItemPosition);
+                onSelectedItemChangedListener.onSelectedItemChanged(this, clampedNewSelectedItemPosition);
             }
         }
     }
@@ -183,11 +199,10 @@ public class PickerView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         checkNotNull(adapter, "adapter == null");
 
-        int itemHeight = adapter.getItemHeight();
         int height = resolveSizeAndState((1 + 2 * preferredMaxOffsetItemCount) * itemHeight, heightMeasureSpec, 0);
         int realHeight = height & ~View.MEASURED_STATE_MASK;
 
-        maxOffsetItemCount = (int) Math.ceil((realHeight / adapter.getItemHeight() - 1) / 2.f);
+        maxOffsetItemCount = (int) Math.ceil((realHeight / itemHeight - 1) / 2.f);
         computeYOffset();
         computeScrollParams();
         setMeasuredDimension(widthMeasureSpec, height);
@@ -197,9 +212,9 @@ public class PickerView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         checkNotNull(adapter, "adapter == null");
-        if (adapter.getItemCount() == 0 || adapter.getItemHeight() == 0) return;
+        if (adapter.getItemCount() == 0 || itemHeight == 0) return;
 
-        selectedItemDrawable.setBounds(0, maxOffsetItemCount * adapter.getItemHeight(), getMeasuredWidth(), (maxOffsetItemCount + 1) * adapter.getItemHeight());
+        selectedItemDrawable.setBounds(0, maxOffsetItemCount * itemHeight, getMeasuredWidth(), (maxOffsetItemCount + 1) * itemHeight);
         selectedItemDrawable.draw(canvas);
 
         drawItems(canvas);
@@ -209,30 +224,26 @@ public class PickerView extends View {
     private void drawItems(Canvas canvas) {
         updateSelectedItem();
 
-        int itemHeight = adapter.getItemHeight();
         float drawYOffset = this.yOffset;
         drawYOffset += (selectedItemPosition - maxOffsetItemCount) * itemHeight;
 
-        int start = selectedItemPosition - maxOffsetItemCount;
+        int start = selectedItemPosition - maxOffsetItemCount - 1;
         int end = selectedItemPosition + maxOffsetItemCount + 1;
 
         // 绘制最上方的一个仅显示一部分的item
-        if (start > 0) {
-            start--;
-            drawYOffset -= itemHeight;
-        }
+        drawYOffset -= itemHeight;
 
         for (int i = start; i <= end; i++) {
             if (i < 0) {
                 if (isCyclic) {
-                    String text = adapter.getText(i % adapter.getItemCount() + adapter.getItemCount());
+                    String text = adapter.getText(clampItemPosition(i));
                     drawText(canvas, text, drawYOffset);
                 }
                 drawYOffset += itemHeight;
                 continue;
             } else if (i >= adapter.getItemCount()) {
                 if (isCyclic) {
-                    String text = adapter.getText(i % adapter.getItemCount());
+                    String text = adapter.getText(clampItemPosition(i));
                     drawText(canvas, text, drawYOffset);
                 }
                 drawYOffset += itemHeight;
@@ -246,16 +257,16 @@ public class PickerView extends View {
     }
 
     private void drawMasks(Canvas canvas) {
-        topMask.setBounds(0, 0, getMeasuredWidth(), maxOffsetItemCount * adapter.getItemHeight());
+        topMask.setBounds(0, 0, getMeasuredWidth(), maxOffsetItemCount * itemHeight);
         topMask.draw(canvas);
 
-        bottomMask.setBounds(0, (maxOffsetItemCount + 1) * adapter.getItemHeight(), getMeasuredWidth(), getMeasuredHeight());
+        bottomMask.setBounds(0, (maxOffsetItemCount + 1) * itemHeight, getMeasuredWidth(), getMeasuredHeight());
         bottomMask.draw(canvas);
     }
 
     private void drawText(Canvas canvas, String text, float offset) {
         textPaint.getTextBounds(text, 0, text.length(), textBounds);
-        float textBottom = offset + (adapter.getItemHeight() + (textBounds.height())) / 2;
+        float textBottom = offset + (itemHeight + (textBounds.height())) / 2;
 
         if (textAlign == Layout.Alignment.ALIGN_CENTER) {
             textPaint.setTextAlign(Paint.Align.CENTER);
@@ -322,10 +333,10 @@ public class PickerView extends View {
             minY = Integer.MIN_VALUE;
             maxY = Integer.MAX_VALUE;
         } else {
-            minY = -(adapter.getItemCount() - 1 - maxOffsetItemCount) * adapter.getItemHeight();
-            maxY = maxOffsetItemCount * adapter.getItemHeight();
+            minY = -(adapter.getItemCount() - 1 - maxOffsetItemCount) * itemHeight;
+            maxY = maxOffsetItemCount * itemHeight;
         }
-        maxOverScrollY = (maxOffsetItemCount > 3 ? 3 : maxOffsetItemCount) * adapter.getItemHeight();
+        maxOverScrollY = (maxOffsetItemCount > 3 ? 3 : maxOffsetItemCount) * itemHeight;
     }
 
     private void updateSelectedItem() {
@@ -336,13 +347,12 @@ public class PickerView extends View {
 
     // 计算selectedItem的offset
     private void computeYOffset() {
-        yOffset = (maxOffsetItemCount - selectedItemPosition) * adapter.getItemHeight();
+        yOffset = (maxOffsetItemCount - selectedItemPosition) * itemHeight;
     }
 
     private void clampYOffset() {
         if (isCyclic) return;
 
-        int itemHeight = adapter.getItemHeight();
         int itemCount = adapter.getItemCount();
 
         float maxYOffset = maxOffsetItemCount * itemHeight + maxOverScrollY;
@@ -362,13 +372,17 @@ public class PickerView extends View {
         if (!isCyclic) {
             centerItem = clampItemPosition(centerItem);
         }
-        return (maxOffsetItemCount - centerItem) * adapter.getItemHeight();
+        return (maxOffsetItemCount - centerItem) * itemHeight;
     }
 
     private int clampItemPosition(int itemPosition) {
+        if (adapter.getItemCount() == 0) return 0;
+
         if (isCyclic) {
-            if (itemPosition < 0) itemPosition = itemPosition % adapter.getItemCount() + adapter.getItemCount();
-            else if (itemPosition >= adapter.getItemCount()) itemPosition %= adapter.getItemCount();
+            if (itemPosition < 0) {
+                itemPosition = itemPosition % adapter.getItemCount();
+                if (itemPosition != 0) itemPosition += adapter.getItemCount();
+            } else if (itemPosition >= adapter.getItemCount()) itemPosition %= adapter.getItemCount();
         }
 
         if (itemPosition < 0) itemPosition = 0;
@@ -378,7 +392,7 @@ public class PickerView extends View {
 
     // 中心线切割的单元位置
     private float centerPosition() {
-        return (float) (maxOffsetItemCount + 0.5 - yOffset / adapter.getItemHeight());
+        return (float) (maxOffsetItemCount + 0.5 - yOffset / itemHeight);
     }
 
     private void justify(int duration) {

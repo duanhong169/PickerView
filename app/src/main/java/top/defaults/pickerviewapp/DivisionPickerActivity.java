@@ -2,6 +2,7 @@ package top.defaults.pickerviewapp;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.List;
@@ -31,10 +32,6 @@ public class DivisionPickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_division_picker);
         ButterKnife.bind(this);
 
-        provincePicker.setPreferredMaxOffsetItemCount(3);
-        cityPicker.setPreferredMaxOffsetItemCount(3);
-        divisionPicker.setPreferredMaxOffsetItemCount(3);
-
         final List<Divisions.Division> divisions = Divisions.get(this);
 
         provisionAdapter.setDivisions(divisions);
@@ -45,6 +42,8 @@ public class DivisionPickerActivity extends AppCompatActivity {
 
         divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
         divisionPicker.setAdapter(divisionAdapter);
+
+        textView.setText(getSelectedDivisionName());
 
         PickerView.OnSelectedItemChangedListener listener = new PickerView.OnSelectedItemChangedListener() {
             @Override
@@ -91,12 +90,8 @@ public class DivisionPickerActivity extends AppCompatActivity {
         }
 
         @Override
-        public int getItemHeight() {
-            return 96;
-        }
-
-        @Override
         public String getText(int index) {
+            if (index >= getItemCount()) return "";
             return getItem(index).getName();
         }
 

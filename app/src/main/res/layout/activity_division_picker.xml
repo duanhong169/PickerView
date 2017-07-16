@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context="top.defaults.pickerviewapp.MainActivity">
 
@@ -17,6 +18,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            app:preferredMaxOffsetItemCount="4"
+            app:textSize="22sp"
+            app:isCyclic="true"
             android:background="#e7e7e7"/>
 
         <top.defaults.view.PickerView
@@ -24,6 +28,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            app:preferredMaxOffsetItemCount="4"
+            app:textSize="20sp"
+            app:isCyclic="true"
             android:background="#e7e7e7"/>
 
         <top.defaults.view.PickerView
@@ -31,6 +38,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            app:preferredMaxOffsetItemCount="4"
+            app:textSize="18sp"
+            app:isCyclic="true"
             android:background="#e7e7e7"/>
 
     </LinearLayout>

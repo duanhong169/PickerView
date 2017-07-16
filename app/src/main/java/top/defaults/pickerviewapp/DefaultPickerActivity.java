@@ -22,17 +22,11 @@ public class DefaultPickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_default_picker);
         ButterKnife.bind(this);
 
-        pickerView.setPreferredMaxOffsetItemCount(4);
         PickerView.Adapter adapter = new PickerView.Adapter() {
 
             @Override
             public int getItemCount() {
                 return 42;
-            }
-
-            @Override
-            public int getItemHeight() {
-                return 64;
             }
 
             @Override
