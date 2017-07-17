@@ -9,8 +9,6 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-
     @OnClick(R.id.defaultPicker) void defaultPicker() {
         startActivity(new Intent(this, DefaultPickerActivity.class));
     }

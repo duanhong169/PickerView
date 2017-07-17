@@ -1,1 +1,1 @@
-include ':app', ':pickerview'
+include ':app', ':picker-view'

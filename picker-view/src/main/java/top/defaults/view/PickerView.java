@@ -8,9 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -48,7 +45,7 @@ public class PickerView extends View {
 
     private int itemHeight;
     private int textSize;
-    private @ColorInt int textColor = Color.BLACK;
+    private int textColor = Color.BLACK;
     private boolean isCyclic;
     private boolean autoFitSize;
     private Drawable selectedItemDrawable;
@@ -62,11 +59,11 @@ public class PickerView extends View {
         this(context, null);
     }
 
-    public PickerView(Context context, @Nullable AttributeSet attrs) {
+    public PickerView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PickerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -92,7 +89,7 @@ public class PickerView extends View {
         });
         scroller = new OverScroller(getContext());
 
-        selectedItemDrawable = ContextCompat.getDrawable(getContext(), R.drawable.top_defaults_view_pickerview_selected_item);
+        selectedItemDrawable = Utils.getDrawable(getContext(), R.drawable.top_defaults_view_pickerview_selected_item);
         topMask = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors);
         bottomMask = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, gradientColors);
 
