@@ -11,7 +11,7 @@ Android滚动选择器
 gradle：
 	
 ```
-compile 'com.github.duanhong169:picker-view:0.1.2@aar'
+compile 'com.github.duanhong169:picker-view:0.1.2'
 ```
 
 maven：
@@ -69,4 +69,4 @@ pickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChanged
 更详细的使用方法请参见示例。
 
 ### License
-请查看LICENSE文件。
+请查看[LICENSE](./LICENSE)文件。
