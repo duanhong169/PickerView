@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="preferredMaxOffsetItemCount" format="integer" />
+    <attr name="itemHeight" format="dimension" />
+    <attr name="textSize" format="dimension" />
+    <attr name="textColor" format="color" />
+    <attr name="isCyclic" format="boolean" />
+    <attr name="autoFitSize" format="boolean" />
+
     <declare-styleable name="PickerView">
-        <attr name="preferredMaxOffsetItemCount" format="integer" />
-        <attr name="itemHeight" format="dimension" />
-        <attr name="textSize" format="dimension" />
-        <attr name="textColor" format="color" />
-        <attr name="isCyclic" format="boolean" />
-        <attr name="autoFitSize" format="boolean" />
+        <attr name="preferredMaxOffsetItemCount" />
+        <attr name="itemHeight" />
+        <attr name="textSize" />
+        <attr name="textColor" />
+        <attr name="isCyclic" />
+        <attr name="autoFitSize" />
+    </declare-styleable>
+
+    <declare-styleable name="DatePickerView">
+        <attr name="preferredMaxOffsetItemCount" />
+        <attr name="itemHeight" />
+        <attr name="textSize" />
+        <attr name="textColor" />
+        <attr name="autoFitSize" />
     </declare-styleable>
 </resources>

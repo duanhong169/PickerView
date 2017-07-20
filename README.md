@@ -1,8 +1,7 @@
 # PickerView
 Android滚动选择器
 
-<img src='art/default.gif' height='500px'/>
-<img src='art/division.gif' height='500px'/>
+<img src='art/default.gif' height='500px'/> <img src='art/division.gif' height='500px'/>
 
 ## 使用方法
 

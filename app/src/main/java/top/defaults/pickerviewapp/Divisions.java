@@ -12,11 +12,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import top.defaults.view.PickerView;
+
 public class Divisions {
 
     private static List<Division> divisions;
 
-    public static class Division {
+    public static class Division implements PickerView.PickerItem {
         private int id;
         private String name;
         private int lvl;
@@ -44,6 +46,11 @@ public class Divisions {
 
         public List<Division> getChildren() {
             return children;
+        }
+
+        @Override
+        public String getText() {
+            return name;
         }
     }
 

@@ -46,7 +46,7 @@ public class DivisionPickerActivity extends AppCompatActivity {
 
         PickerView.OnSelectedItemChangedListener listener = new PickerView.OnSelectedItemChangedListener() {
             @Override
-            public void onSelectedItemChanged(PickerView pickerView, int selectedItemPosition) {
+            public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
                 switch (pickerView.getId()) {
                     case R.id.provincePicker:
                         cityAdapter.setDivisions(provisionAdapter.getItem(provincePicker.getSelectedItemPosition()).getChildren());
@@ -88,13 +88,9 @@ public class DivisionPickerActivity extends AppCompatActivity {
             return divisions == null ? 0 : divisions.size();
         }
 
-        @Override
-        public String getText(int index) {
-            if (index >= getItemCount()) return "";
-            return getItem(index).getName();
-        }
 
-        private Divisions.Division getItem(int index) {
+        @Override
+        public Divisions.Division getItem(int index) {
             return divisions.get(index);
         }
     }

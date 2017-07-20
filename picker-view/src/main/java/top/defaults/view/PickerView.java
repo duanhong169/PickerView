@@ -24,7 +24,7 @@ public class PickerView extends View {
 
     private static final String TAG = "PickerView";
 
-    private static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
+    static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
     private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
     private int maxOffsetItemCount;
     private int selectedItemPosition = 0;
@@ -54,6 +54,10 @@ public class PickerView extends View {
     private GradientDrawable topMask;
     private GradientDrawable bottomMask;
     private Layout.Alignment textAlign = Layout.Alignment.ALIGN_CENTER;
+
+    public interface PickerItem {
+        String getText();
+    }
 
     public PickerView(Context context) {
         this(context, null);
@@ -126,11 +130,21 @@ public class PickerView extends View {
     public void setAdapter(final Adapter adapter) {
         checkNotNull(adapter, "adapter == null");
         if (adapter.getItemCount() > Integer.MAX_VALUE / itemHeight) {
-            Log.w(TAG, "getItemCount() is too large, unsupported yet");
+            throw new RuntimeException("getItemCount() is too large, max count can be PickerView.getMaxCount()");
         }
 
         adapter.setPickerView(this);
         this.adapter = adapter;
+    }
+
+    protected int getMaxCount() {
+        return Integer.MAX_VALUE / itemHeight;
+    }
+
+    public void notifyDataSetChanged() {
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public abstract static class Adapter {
@@ -144,6 +158,7 @@ public class PickerView extends View {
             if (pickerViewRef != null) {
                 PickerView pickerView = pickerViewRef.get();
                 if (pickerView != null) {
+                    pickerView.notifySelectedItemChangedIfNeeded(pickerView.selectedItemPosition, true);
                     pickerView.updateSelectedItem();
                     pickerView.computeScrollParams();
                     if (!pickerView.scroller.isFinished()) {
@@ -156,7 +171,52 @@ public class PickerView extends View {
         }
 
         public abstract int getItemCount();
-        public abstract String getText(int index);
+        public abstract PickerItem getItem(int index);
+
+        public String getText(int index) {
+            if (getItem(index) == null) return "null";
+            return getItem(index).getText();
+        }
+    }
+
+    public void setPreferredMaxOffsetItemCount(int preferredMaxOffsetItemCount) {
+        this.preferredMaxOffsetItemCount = preferredMaxOffsetItemCount;
+    }
+
+    public void setItemHeight(int itemHeight) {
+        if (this.itemHeight != itemHeight) {
+            this.itemHeight = itemHeight;
+            invalidate();
+            requestLayout();
+        }
+    }
+
+    public void setTextSize(int textSize) {
+        if (this.textSize != textSize) {
+            this.textSize = textSize;
+            invalidate();
+        }
+    }
+
+    public void setTextColor(int textColor) {
+        if (this.textColor != textColor) {
+            this.textColor = textColor;
+            invalidate();
+        }
+    }
+
+    public void setCyclic(boolean cyclic) {
+        if (this.isCyclic != cyclic) {
+            isCyclic = cyclic;
+            invalidate();
+        }
+    }
+
+    public void setAutoFitSize(boolean autoFitSize) {
+        if (this.autoFitSize != autoFitSize) {
+            this.autoFitSize = autoFitSize;
+            invalidate();
+        }
     }
 
     public int getSelectedItemPosition() {
@@ -172,7 +232,7 @@ public class PickerView extends View {
     }
 
     public interface OnSelectedItemChangedListener {
-        void onSelectedItemChanged(PickerView pickerView, int selectedItemPosition);
+        void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition);
     }
 
     private OnSelectedItemChangedListener onSelectedItemChangedListener;
@@ -182,9 +242,14 @@ public class PickerView extends View {
     }
 
     private void notifySelectedItemChangedIfNeeded(int newSelectedItemPosition) {
+        notifySelectedItemChangedIfNeeded(newSelectedItemPosition, false);
+    }
+
+    private void notifySelectedItemChangedIfNeeded(int newSelectedItemPosition, boolean forceNotify) {
+        int clampedOldSelectedItemPosition = clampItemPosition(selectedItemPosition);
         int clampedNewSelectedItemPosition = clampItemPosition(newSelectedItemPosition);
 
-        boolean changed = false;
+        boolean changed = forceNotify;
         if (isCyclic) {
             if (selectedItemPosition != newSelectedItemPosition) {
                 selectedItemPosition = newSelectedItemPosition;
@@ -198,7 +263,7 @@ public class PickerView extends View {
         }
 
         if (changed && onSelectedItemChangedListener != null) {
-            onSelectedItemChangedListener.onSelectedItemChanged(this, clampedNewSelectedItemPosition);
+            onSelectedItemChangedListener.onSelectedItemChanged(this, clampedOldSelectedItemPosition, clampedNewSelectedItemPosition);
         }
     }
 

@@ -17,6 +17,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(this, DivisionPickerActivity.class));
     }
 
+    @OnClick(R.id.datePicker) void datePicker() {
+        startActivity(new Intent(this, DatePickerActivity.class));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
