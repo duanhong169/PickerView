@@ -43,6 +43,7 @@ class Utils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             return context.getDrawable(id);
         } else if (Build.VERSION.SDK_INT >= 16) {
+            //noinspection deprecation
             return context.getResources().getDrawable(id);
         } else {
             // Prior to JELLY_BEAN, Resources.getDrawable() would not correctly
@@ -57,6 +58,7 @@ class Utils {
                 context.getResources().getValue(id, sTempValue, true);
                 resolvedId = sTempValue.resourceId;
             }
+            //noinspection deprecation
             return context.getResources().getDrawable(resolvedId);
         }
     }

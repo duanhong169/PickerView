@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -36,6 +37,6 @@ public class DatePickerActivity extends AppCompatActivity {
             }
         });
         datePickerView.setStartDate(Calendar.getInstance());
-
+        datePickerView.setSelectedDate(new GregorianCalendar(2030, 3, 19));
     }
 }

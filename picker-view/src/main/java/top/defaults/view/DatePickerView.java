@@ -27,6 +27,22 @@ public class DatePickerView extends LinearLayout {
     private final PickerView monthPickerView;
     private final PickerView dayPickerView;
 
+    public interface OnSelectedDateChangedListener {
+        void onSelectedDateChanged(Calendar date);
+    }
+
+    private OnSelectedDateChangedListener onSelectedDateChangedListener;
+
+    public void setOnSelectedDateChangedListener(OnSelectedDateChangedListener onSelectedDateChangedListener) {
+        this.onSelectedDateChangedListener = onSelectedDateChangedListener;
+    }
+
+    private void notifySelectedDateChanged(Calendar date) {
+        if (onSelectedDateChangedListener != null) {
+            onSelectedDateChangedListener.onSelectedDateChanged(date);
+        }
+    }
+
     public DatePickerView(Context context) {
         this(context, null);
     }
@@ -37,6 +53,7 @@ public class DatePickerView extends LinearLayout {
 
     public DatePickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
         yearPickerView = new PickerView(context);
         monthPickerView = new PickerView(context);
         dayPickerView = new PickerView(context);
@@ -79,6 +96,7 @@ public class DatePickerView extends LinearLayout {
 
         monthPickerView.setAdapter(new PickerView.Adapter() {
 
+            // 不显示开始日期之前的月份
             private boolean isAtStartYear() {
                 return (startDate != null && selectedDate.get(Calendar.YEAR) == startDate.get(Calendar.YEAR));
             }
@@ -101,6 +119,7 @@ public class DatePickerView extends LinearLayout {
 
         dayPickerView.setAdapter(new PickerView.Adapter() {
 
+            // 不显示开始日期之前的日期
             private boolean isAtStartYearAndMonth() {
                 return (startDate != null
                         && selectedDate.get(Calendar.YEAR) == startDate.get(Calendar.YEAR)
@@ -280,21 +299,5 @@ public class DatePickerView extends LinearLayout {
     private void reloadData() {
         updateSelection();
         yearPickerView.notifyDataSetChanged();
-    }
-
-    public interface OnSelectedDateChangedListener {
-        void onSelectedDateChanged(Calendar date);
-    }
-
-    private OnSelectedDateChangedListener onSelectedDateChangedListener;
-
-    public void setOnSelectedDateChangedListener(OnSelectedDateChangedListener onSelectedDateChangedListener) {
-        this.onSelectedDateChangedListener = onSelectedDateChangedListener;
-    }
-
-    private void notifySelectedDateChanged(Calendar date) {
-        if (onSelectedDateChangedListener != null) {
-            onSelectedDateChangedListener.onSelectedDateChanged(date);
-        }
     }
 }

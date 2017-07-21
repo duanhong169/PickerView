@@ -300,10 +300,11 @@ public class PickerView extends View {
         float drawYOffset = this.yOffset;
         drawYOffset += (selectedItemPosition - maxOffsetItemCount) * itemHeight;
 
+        // 上下多绘制一个item
         int start = selectedItemPosition - maxOffsetItemCount - 1;
         int end = selectedItemPosition + maxOffsetItemCount + 1;
 
-        // 绘制最上方的一个仅显示一部分的item
+        // 向上便宜一个item作为起始点
         drawYOffset -= itemHeight;
 
         for (int i = start; i <= end; i++) {
