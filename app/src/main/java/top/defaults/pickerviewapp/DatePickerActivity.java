@@ -11,13 +11,14 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import top.defaults.view.DatePickerView;
+import top.defaults.view.DateTimePickerView;
 
 public class DatePickerActivity extends AppCompatActivity {
 
     private static final String TAG = "DatePickerActivity";
 
-    @BindView(R.id.datePickerView) DatePickerView datePickerView;
+    @BindView(R.id.datePickerView)
+    DateTimePickerView dateTimePickerView;
     @BindView(R.id.textView) TextView textView;
 
     @Override
@@ -25,7 +26,7 @@ public class DatePickerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_date_picker);
         ButterKnife.bind(this);
-        datePickerView.setOnSelectedDateChangedListener(new DatePickerView.OnSelectedDateChangedListener() {
+        dateTimePickerView.setOnSelectedDateChangedListener(new DateTimePickerView.OnSelectedDateChangedListener() {
             @Override
             public void onSelectedDateChanged(Calendar date) {
                 int year = date.get(Calendar.YEAR);
@@ -36,7 +37,7 @@ public class DatePickerActivity extends AppCompatActivity {
                 Log.d(TAG, "new date: " + dateString);
             }
         });
-        datePickerView.setStartDate(Calendar.getInstance());
-        datePickerView.setSelectedDate(new GregorianCalendar(2030, 3, 19));
+        dateTimePickerView.setStartDate(Calendar.getInstance());
+        dateTimePickerView.setSelectedDate(new GregorianCalendar(2018, 3, 19));
     }
 }

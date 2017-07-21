@@ -16,11 +16,17 @@
         <attr name="autoFitSize" />
     </declare-styleable>
 
-    <declare-styleable name="DatePickerView">
+    <declare-styleable name="PickerViewGroup">
         <attr name="preferredMaxOffsetItemCount" />
         <attr name="itemHeight" />
         <attr name="textSize" />
         <attr name="textColor" />
         <attr name="autoFitSize" />
+        <attr name="type" format="enum">
+            <enum name="dateTime" value="0"/>
+            <enum name="dateHourMinute" value="1"/>
+            <enum name="yearMonthDayHourMinute" value="2"/>
+            <enum name="yearMonthDay" value="3"/>
+        </attr>
     </declare-styleable>
 </resources>
