@@ -93,7 +93,27 @@ public class PickerView extends View {
         });
         scroller = new OverScroller(getContext());
 
-        selectedItemDrawable = Utils.getDrawable(getContext(), R.drawable.top_defaults_view_pickerview_selected_item);
+        if (isInEditMode()) {
+            adapter = new Adapter() {
+                @Override
+                public int getItemCount() {
+                    return getMaxCount();
+                }
+
+                @Override
+                public PickerItem getItem(final int index) {
+                    return new PickerItem() {
+                        @Override
+                        public String getText() {
+                            return "Item " + index;
+                        }
+                    };
+                }
+            };
+        } else {
+            selectedItemDrawable = Utils.getDrawable(getContext(), R.drawable.top_defaults_view_pickerview_selected_item);
+        }
+
         topMask = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors);
         bottomMask = new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, gradientColors);
 
@@ -287,8 +307,10 @@ public class PickerView extends View {
         checkNotNull(adapter, "adapter == null");
         if (adapter.getItemCount() == 0 || itemHeight == 0) return;
 
-        selectedItemDrawable.setBounds(0, maxOffsetItemCount * itemHeight, getMeasuredWidth(), (maxOffsetItemCount + 1) * itemHeight);
-        selectedItemDrawable.draw(canvas);
+        if (!isInEditMode()) {
+            selectedItemDrawable.setBounds(0, maxOffsetItemCount * itemHeight, getMeasuredWidth(), (maxOffsetItemCount + 1) * itemHeight);
+            selectedItemDrawable.draw(canvas);
+        }
 
         drawItems(canvas);
         drawMasks(canvas);
