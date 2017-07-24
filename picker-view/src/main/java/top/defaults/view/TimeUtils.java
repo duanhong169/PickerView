@@ -15,6 +15,12 @@ class TimeUtils {
         return Calendar.getInstance();
     }
 
+    static boolean isToday(Calendar calendar) {
+        Calendar current = getCurrentTime();
+        return current.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
+                && current.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR);
+    }
+
     static String date(Calendar calendar) {
         StringBuilder sb = new StringBuilder(calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()));
         if (Locale.getDefault().equals(Locale.CHINA)) {

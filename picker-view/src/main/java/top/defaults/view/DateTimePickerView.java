@@ -214,6 +214,9 @@ public class DateTimePickerView extends PickerViewGroup {
                         return new PickerView.PickerItem() {
                             @Override
                             public String getText() {
+                                if (TimeUtils.isToday(tempCalendar)) {
+                                    return "今天";
+                                }
                                 return TimeUtils.date(tempCalendar);
                             }
                         };
