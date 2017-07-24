@@ -7,21 +7,16 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import static top.defaults.view.DateTimePickerView.TYPE_YEAR_MONTH_DAY;
 import static top.defaults.view.PickerView.DEFAULT_MAX_OFFSET_ITEM_COUNT;
 
 public class PickerViewGroup extends LinearLayout {
-
-    protected static final int TYPE_DATE_TIME = 0;
-    protected static final int TYPE_DATE_HOUR_MINUTE = 1;
-    protected static final int TYPE_YEAR_MONTH_DAY_HOUR_MINUTE = 2;
-    protected static final int TYPE_YEAR_MONTH_DAY = 3;
 
     protected int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
     protected int itemHeight;
     protected int textSize;
     protected int textColor = Color.BLACK;
     protected boolean autoFitSize;
-    protected int type = TYPE_YEAR_MONTH_DAY;
 
     public PickerViewGroup(Context context) {
         this(context, null);
@@ -43,7 +38,6 @@ public class PickerViewGroup extends LinearLayout {
         textSize = typedArray.getDimensionPixelSize(R.styleable.PickerViewGroup_textSize, defaultTextSize);
         textColor = typedArray.getColor(R.styleable.PickerViewGroup_textColor, Color.BLACK);
         autoFitSize = typedArray.getBoolean(R.styleable.PickerViewGroup_autoFitSize, true);
-        type = typedArray.getInt(R.styleable.PickerViewGroup_type, TYPE_YEAR_MONTH_DAY);
         typedArray.recycle();
     }
 

@@ -32,12 +32,14 @@ public class DatePickerActivity extends AppCompatActivity {
                 int year = date.get(Calendar.YEAR);
                 int month = date.get(Calendar.MONTH);
                 int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-                String dateString = String.format(Locale.getDefault(), "%d年%02d月%02d日", year, month + 1, dayOfMonth);
+                int hour = date.get(Calendar.HOUR_OF_DAY);
+                int minute = date.get(Calendar.MINUTE);
+                String dateString = String.format(Locale.getDefault(), "%d年%02d月%02d日%02d时%02d分", year, month + 1, dayOfMonth, hour, minute);
                 textView.setText(dateString);
                 Log.d(TAG, "new date: " + dateString);
             }
         });
         dateTimePickerView.setStartDate(Calendar.getInstance());
-        dateTimePickerView.setSelectedDate(new GregorianCalendar(2018, 3, 19));
+        dateTimePickerView.setSelectedDate(Calendar.getInstance());
     }
 }

@@ -22,11 +22,22 @@
         <attr name="textSize" />
         <attr name="textColor" />
         <attr name="autoFitSize" />
+    </declare-styleable>
+
+    <declare-styleable name="DateTimePickerView">
         <attr name="type" format="enum">
             <enum name="dateTime" value="0"/>
             <enum name="dateHourMinute" value="1"/>
             <enum name="yearMonthDayHourMinute" value="2"/>
             <enum name="yearMonthDay" value="3"/>
+        </attr>
+        <attr name="minutesInterval" format="enum">
+            <enum name="one" value="1"/>
+            <enum name="five" value="5"/>
+            <enum name="ten" value="10"/>
+            <enum name="fifteen" value="15"/>
+            <enum name="twenty" value="20"/>
+            <enum name="thirty" value="30"/>
         </attr>
     </declare-styleable>
 </resources>
