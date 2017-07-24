@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import static top.defaults.view.DateTimePickerView.TYPE_YEAR_MONTH_DAY;
 import static top.defaults.view.PickerView.DEFAULT_MAX_OFFSET_ITEM_COUNT;
 
 public class PickerViewGroup extends LinearLayout {
