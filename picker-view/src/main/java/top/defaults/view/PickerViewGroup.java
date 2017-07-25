@@ -49,9 +49,13 @@ public class PickerViewGroup extends LinearLayout {
     }
 
     protected void settlePickerView(PickerView pickerView) {
+        settlePickerView(pickerView, false);
+    }
+
+    protected void settlePickerView(PickerView pickerView, boolean narrow) {
         if (pickerView == null) return;
         bindParams(pickerView);
-        addPickerView(pickerView);
+        addPickerView(pickerView, narrow);
     }
 
     protected void bindParams(PickerView pickerView) {
@@ -62,8 +66,8 @@ public class PickerViewGroup extends LinearLayout {
         pickerView.setAutoFitSize(autoFitSize);
     }
 
-    protected void addPickerView(PickerView pickerView) {
-        LinearLayout.LayoutParams layoutParams = new LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+    protected void addPickerView(PickerView pickerView, boolean narrow) {
+        LinearLayout.LayoutParams layoutParams = new LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, narrow ? 1 : 2);
         addView(pickerView, layoutParams);
     }
 }

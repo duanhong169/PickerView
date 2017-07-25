@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         app:preferredMaxOffsetItemCount="3"
         app:textSize="18sp"
-        app:type="dateTime"
+        app:type="yearMonthDayHourMinute"
         app:minutesInterval="fifteen"
         android:background="#e7e7e7"/>
 

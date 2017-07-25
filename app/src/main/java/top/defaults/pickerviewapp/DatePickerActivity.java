@@ -40,6 +40,6 @@ public class DatePickerActivity extends AppCompatActivity {
             }
         });
         dateTimePickerView.setStartDate(Calendar.getInstance());
-        dateTimePickerView.setSelectedDate(Calendar.getInstance());
+        dateTimePickerView.setSelectedDate(new GregorianCalendar(2017, 6, 27, 21, 30));
     }
 }
