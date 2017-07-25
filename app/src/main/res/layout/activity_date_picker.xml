@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         app:preferredMaxOffsetItemCount="3"
         app:textSize="18sp"
-        app:type="yearMonthDayHourMinute"
+        app:type="dateTime"
         app:minutesInterval="fifteen"
         android:background="#e7e7e7"/>
 
@@ -25,4 +25,9 @@
         android:textColor="@color/colorAccent"
         android:gravity="center"/>
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/switch_type"/>
 </LinearLayout>

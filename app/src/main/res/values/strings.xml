@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PickerViewApp</string>
+    <string name="switch_type">Switch Type</string>
 </resources>

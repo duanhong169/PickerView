@@ -12,23 +12,23 @@ import static top.defaults.view.Utils.checkNotNull;
 
 public class DateTimePickerView extends PickerViewGroup {
 
-    protected static final int TYPE_DATE_TIME = 0;
-    protected static final int TYPE_DATE_HOUR_MINUTE = 1;
-    protected static final int TYPE_YEAR_MONTH_DAY_HOUR_MINUTE = 2;
-    protected static final int TYPE_YEAR_MONTH_DAY = 3;
+    public static final int TYPE_DATE_TIME = 0;
+    public static final int TYPE_DATE_HOUR_MINUTE = 1;
+    public static final int TYPE_YEAR_MONTH_DAY_HOUR_MINUTE = 2;
+    public static final int TYPE_YEAR_MONTH_DAY = 3;
 
     protected int type = TYPE_YEAR_MONTH_DAY;
 
     private Calendar startDate;
     private Calendar selectedDate;
 
-    private final PickerView yearPickerView;
-    private final PickerView monthPickerView;
-    private final PickerView dayPickerView;
-    private final PickerView datePickerView;
-    private final PickerView hourPickerView;
-    private final PickerView minutePickerView;
-    private final PickerView timePickerView;
+    private PickerView yearPickerView;
+    private PickerView monthPickerView;
+    private PickerView dayPickerView;
+    private PickerView datePickerView;
+    private PickerView hourPickerView;
+    private PickerView minutePickerView;
+    private PickerView timePickerView;
 
     public static final int ONE = 1;
     public static final int FIVE = 5;
@@ -73,6 +73,12 @@ public class DateTimePickerView extends PickerViewGroup {
         type = typedArray.getInt(R.styleable.DateTimePickerView_type, TYPE_YEAR_MONTH_DAY);
         minutesInterval = typedArray.getInt(R.styleable.DateTimePickerView_minutesInterval, FIVE);
         typedArray.recycle();
+
+        buildViews(context);
+    }
+
+    private void buildViews(Context context) {
+        removeAllViews();
 
         switch (type) {
             case TYPE_DATE_TIME:
@@ -335,6 +341,29 @@ public class DateTimePickerView extends PickerViewGroup {
             tempCalendar.set(Calendar.MINUTE, 0);
             tempCalendar.add(Calendar.MINUTE, hostRef.get().minutesInterval * stepCount);
             return TimeUtils.time(tempCalendar);
+        }
+    }
+
+    public void setType(int type) {
+        this.type = type;
+        buildViews(getContext());
+    }
+
+    public void setMinutesInterval(int minutesInterval) {
+        if (minutesInterval != ONE && minutesInterval != FIVE && minutesInterval != TEN
+                && minutesInterval != FIFTEEN && minutesInterval != TWENTY && minutesInterval != THIRTY) {
+            throw new RuntimeException("minutesInterval can only be (1, 5, 10, 15, 20, 30), invalid: " + minutesInterval);
+        }
+
+        if (this.minutesInterval != minutesInterval) {
+            this.minutesInterval = minutesInterval;
+            if (timePickerView != null) {
+                timePickerView.notifyDataSetChanged();
+            }
+
+            if (minutePickerView != null) {
+                minutePickerView.notifyDataSetChanged();
+            }
         }
     }
 

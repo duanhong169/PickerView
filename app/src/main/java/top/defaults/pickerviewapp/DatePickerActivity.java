@@ -3,23 +3,31 @@ package top.defaults.pickerviewapp;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import top.defaults.view.DateTimePickerView;
 
 public class DatePickerActivity extends AppCompatActivity {
 
     private static final String TAG = "DatePickerActivity";
+    private int type = DateTimePickerView.TYPE_DATE_TIME;
 
-    @BindView(R.id.datePickerView)
-    DateTimePickerView dateTimePickerView;
+    @BindView(R.id.datePickerView) DateTimePickerView dateTimePickerView;
     @BindView(R.id.textView) TextView textView;
+    @OnClick(R.id.button) void buttonClicked() {
+        type++;
+        type %= 4;
+        dateTimePickerView.setType(type);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
