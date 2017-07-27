@@ -2,6 +2,7 @@
 Android滚动选择器
 
 <img src='art/default.gif' height='500px'/> <img src='art/division.gif' height='500px'/>
+<img src='art/date_time.gif' height='500px'/>
 
 ## 使用方法
 
@@ -10,7 +11,7 @@ Android滚动选择器
 gradle：
 	
 ```
-compile 'com.github.duanhong169:picker-view:0.1.2'
+compile 'com.github.duanhong169:picker-view:0.1.4'
 ```
 
 maven：
@@ -19,13 +20,15 @@ maven：
 <dependency>
 	<groupId>com.github.duanhong169</groupId>
 	<artifactId>picker-view</artifactId>
-	<version>0.1.2</version>
+	<version>0.1.4</version>
 	<type>pom</type>
 </dependency>
 ```
 
 ### 2. 集成到项目中
-	
+
+#### 2.1 集成PickerView
+
 添加到layout文件中：
 
 ```	
@@ -61,6 +64,48 @@ pickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChanged
     public void onSelectedItemChanged(PickerView pickerView, int selectedItemPosition) {
         Log.d(TAG, "selectedItemPosition: " + selectedItemPosition);
         textView.setText(pickerView.getAdapter().getText(selectedItemPosition));
+    }
+});
+```
+
+2.2 集成DateTimePickerView
+
+添加到layout文件中：
+
+```	
+<top.defaults.view.DateTimePickerView
+    android:id="@+id/datePickerView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:preferredMaxOffsetItemCount="3"
+    app:textSize="18sp"
+    app:type="dateTime"
+    app:minutesInterval="fifteen"
+    android:background="#e7e7e7"/>
+```
+
+设置初始日期：
+
+```java
+dateTimePickerView.setStartDate(Calendar.getInstance());
+// 注意：月份是从0开始计数的
+dateTimePickerView.setSelectedDate(new GregorianCalendar(2017, 6, 27, 21, 30));
+```
+
+监听选择事件：
+
+```java
+dateTimePickerView.setOnSelectedDateChangedListener(new DateTimePickerView.OnSelectedDateChangedListener() {
+    @Override
+    public void onSelectedDateChanged(Calendar date) {
+        int year = date.get(Calendar.YEAR);
+        int month = date.get(Calendar.MONTH);
+        int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int minute = date.get(Calendar.MINUTE);
+        String dateString = String.format(Locale.getDefault(), "%d年%02d月%02d日%02d时%02d分", year, month + 1, dayOfMonth, hour, minute);
+        textView.setText(dateString);
+        Log.d(TAG, "new date: " + dateString);
     }
 });
 ```

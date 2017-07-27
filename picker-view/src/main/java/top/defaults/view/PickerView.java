@@ -326,7 +326,7 @@ public class PickerView extends View {
         int start = selectedItemPosition - maxOffsetItemCount - 1;
         int end = selectedItemPosition + maxOffsetItemCount + 1;
 
-        // 向上便宜一个item作为起始点
+        // 向上偏移一个item作为起始点
         drawYOffset -= itemHeight;
 
         for (int i = start; i <= end; i++) {
