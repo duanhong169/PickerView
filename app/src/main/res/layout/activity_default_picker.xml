@@ -12,7 +12,7 @@
         android:id="@+id/pickerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:isCyclic="true"
+        app:isCyclic="false"
         android:background="#e7e7e7"/>
 
     <TextView

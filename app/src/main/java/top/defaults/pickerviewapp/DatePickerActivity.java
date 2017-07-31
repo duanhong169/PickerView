@@ -13,8 +13,10 @@ import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import top.defaults.view.DateTimePickerView;
+import top.defaults.view.PickerView;
 
 public class DatePickerActivity extends AppCompatActivity {
 
@@ -27,6 +29,13 @@ public class DatePickerActivity extends AppCompatActivity {
         type++;
         type %= 4;
         dateTimePickerView.setType(type);
+    }
+    @OnCheckedChanged(R.id.curved) void toggle(boolean checked) {
+        int count = dateTimePickerView.getChildCount();
+        for (int i = 0; i < count; i++) {
+            PickerView pickerView = (PickerView) dateTimePickerView.getChildAt(i);
+            pickerView.setCurved(checked);
+        }
     }
 
     @Override

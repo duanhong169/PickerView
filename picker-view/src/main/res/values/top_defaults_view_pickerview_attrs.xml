@@ -6,6 +6,7 @@
     <attr name="textColor" format="color" />
     <attr name="isCyclic" format="boolean" />
     <attr name="autoFitSize" format="boolean" />
+    <attr name="curved" format="boolean" />
 
     <declare-styleable name="PickerView">
         <attr name="preferredMaxOffsetItemCount" />
@@ -14,6 +15,7 @@
         <attr name="textColor" />
         <attr name="isCyclic" />
         <attr name="autoFitSize" />
+        <attr name="curved" />
     </declare-styleable>
 
     <declare-styleable name="PickerViewGroup">
@@ -22,6 +24,7 @@
         <attr name="textSize" />
         <attr name="textColor" />
         <attr name="autoFitSize" />
+        <attr name="curved" />
     </declare-styleable>
 
     <declare-styleable name="DateTimePickerView">

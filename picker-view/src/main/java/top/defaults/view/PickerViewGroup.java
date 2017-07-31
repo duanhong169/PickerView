@@ -16,6 +16,7 @@ public class PickerViewGroup extends LinearLayout {
     protected int textSize;
     protected int textColor = Color.BLACK;
     protected boolean autoFitSize;
+    protected boolean curved;
 
     public PickerViewGroup(Context context) {
         this(context, null);
@@ -37,6 +38,7 @@ public class PickerViewGroup extends LinearLayout {
         textSize = typedArray.getDimensionPixelSize(R.styleable.PickerViewGroup_textSize, defaultTextSize);
         textColor = typedArray.getColor(R.styleable.PickerViewGroup_textColor, Color.BLACK);
         autoFitSize = typedArray.getBoolean(R.styleable.PickerViewGroup_autoFitSize, true);
+        curved = typedArray.getBoolean(R.styleable.PickerViewGroup_curved, false);
         typedArray.recycle();
     }
 
@@ -64,6 +66,7 @@ public class PickerViewGroup extends LinearLayout {
         pickerView.setTextSize(textSize);
         pickerView.setTextColor(textColor);
         pickerView.setAutoFitSize(autoFitSize);
+        pickerView.setCurved(curved);
     }
 
     protected void addPickerView(PickerView pickerView, boolean narrow) {
