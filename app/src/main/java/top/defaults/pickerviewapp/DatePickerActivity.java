@@ -31,11 +31,7 @@ public class DatePickerActivity extends AppCompatActivity {
         dateTimePickerView.setType(type);
     }
     @OnCheckedChanged(R.id.curved) void toggle(boolean checked) {
-        int count = dateTimePickerView.getChildCount();
-        for (int i = 0; i < count; i++) {
-            PickerView pickerView = (PickerView) dateTimePickerView.getChildAt(i);
-            pickerView.setCurved(checked);
-        }
+        dateTimePickerView.setCurved(checked);
     }
 
     @Override

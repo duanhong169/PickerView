@@ -50,6 +50,15 @@ public class PickerViewGroup extends LinearLayout {
         super.setOrientation(orientation);
     }
 
+    public void setCurved(boolean curved) {
+        this.curved = curved;
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            PickerView pickerView = (PickerView) getChildAt(i);
+            pickerView.setCurved(curved);
+        }
+    }
+
     protected void settlePickerView(PickerView pickerView) {
         settlePickerView(pickerView, false);
     }

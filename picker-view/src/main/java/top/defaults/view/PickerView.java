@@ -2,8 +2,10 @@ package top.defaults.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -55,6 +57,10 @@ public class PickerView extends View {
     private GradientDrawable topMask;
     private GradientDrawable bottomMask;
     private Layout.Alignment textAlign = Layout.Alignment.ALIGN_CENTER;
+
+    private float radius;
+    private Camera camera;
+    private Matrix matrix;
 
     public interface PickerItem {
         String getText();
@@ -131,10 +137,13 @@ public class PickerView extends View {
 
         isCyclic = typedArray.getBoolean(R.styleable.PickerView_isCyclic, false);
         autoFitSize = typedArray.getBoolean(R.styleable.PickerView_autoFitSize, true);
-        curved = typedArray.getBoolean(R.styleable.PickerViewGroup_curved, false);
+        curved = typedArray.getBoolean(R.styleable.PickerView_curved, true);
         typedArray.recycle();
 
         initPaints();
+
+        camera = new Camera();
+        matrix = new Matrix();
     }
 
     private void initPaints() {
@@ -309,7 +318,7 @@ public class PickerView extends View {
 
     private int calculateIntrinsicHeight() {
         if (curved) {
-            float radius = ((float) itemHeight / 2) / (float) Math.sin(Math.PI / (2 * (3 + 2 * preferredMaxOffsetItemCount)));
+            radius = itemHeight / (float) Math.sin(Math.PI / (3 + 2 * preferredMaxOffsetItemCount));
             return (int) Math.ceil(2 * radius);
         } else {
             return (1 + 2 * preferredMaxOffsetItemCount) * itemHeight;
@@ -332,19 +341,27 @@ public class PickerView extends View {
     }
 
     private void drawItems(Canvas canvas) {
+         // 绘制选中项
         float drawYOffset = this.yOffset + (getMeasuredHeight() - itemHeight) / 2;
         int itemPosition = selectedItemPosition;
+        String text = adapter.getText(clampItemPosition(itemPosition));
+        drawText(canvas, text, drawYOffset);
+        drawYOffset -= itemHeight;
+
+        // 绘制选中项上方的item
+        itemPosition = selectedItemPosition - 1;
         while (drawYOffset + itemHeight > 0) {
             if (!isPositionValid(itemPosition) && !isCyclic) {
                 break;
             }
 
-            String text = adapter.getText(clampItemPosition(itemPosition));
+            text = adapter.getText(clampItemPosition(itemPosition));
             drawText(canvas, text, drawYOffset);
             drawYOffset -= itemHeight;
             itemPosition--;
         }
 
+        // 绘制选中项下方的item
         drawYOffset = this.yOffset + (getMeasuredHeight() + itemHeight) / 2;
         itemPosition = selectedItemPosition + 1;
         while ((drawYOffset < getMeasuredHeight())) {
@@ -352,7 +369,7 @@ public class PickerView extends View {
                 break;
             }
 
-            String text = adapter.getText(clampItemPosition(itemPosition));
+            text = adapter.getText(clampItemPosition(itemPosition));
             drawText(canvas, text, drawYOffset);
             drawYOffset += itemHeight;
             itemPosition++;
@@ -380,6 +397,18 @@ public class PickerView extends View {
 
         float textBottom = offset + (itemHeight + (textBounds.height())) / 2;
 
+        if (curved) {
+            double radian = Math.atan((radius - (offset + itemHeight / 2)) / radius) * (2f / preferredMaxOffsetItemCount);
+            float degree = (float) (radian * 180 / Math.PI);
+            camera.save();
+            camera.rotateX(degree);
+            camera.translate(0, 0, - Math.abs((radius / (2 + preferredMaxOffsetItemCount)) * (float) Math.sin(radian)));
+            camera.getMatrix(matrix);
+            matrix.preTranslate(-getMeasuredWidth() / 2, -getMeasuredHeight() / 2);
+            matrix.postTranslate(getMeasuredWidth() / 2, getMeasuredHeight() / 2);
+            canvas.save();
+            canvas.concat(matrix);
+        }
         if (textAlign == Layout.Alignment.ALIGN_CENTER) {
             textPaint.setTextAlign(Paint.Align.CENTER);
             canvas.drawText(text, getMeasuredWidth() / 2, textBottom, textPaint);
@@ -389,6 +418,10 @@ public class PickerView extends View {
         } else {
             textPaint.setTextAlign(Paint.Align.LEFT);
             canvas.drawText(text, 0, textBottom, textPaint);
+        }
+        if (curved) {
+            canvas.restore();
+            camera.restore();
         }
     }
 
