@@ -2,7 +2,7 @@
 Android滚动选择器
 
 <img src='art/default.gif' height='500px'/> <img src='art/division.gif' height='500px'/>
-<img src='art/date_time.gif' height='500px'/>
+<img src='art/date_time.gif' height='500px'/> <img src='art/curved.gif' height='500px'/>
 
 ## 使用方法
 
@@ -11,7 +11,7 @@ Android滚动选择器
 gradle：
 	
 ```
-compile 'com.github.duanhong169:picker-view:0.1.4'
+compile 'com.github.duanhong169:picker-view:0.2.0'
 ```
 
 maven：
@@ -20,7 +20,7 @@ maven：
 <dependency>
 	<groupId>com.github.duanhong169</groupId>
 	<artifactId>picker-view</artifactId>
-	<version>0.1.4</version>
+	<version>0.2.0</version>
 	<type>pom</type>
 </dependency>
 ```
@@ -81,6 +81,7 @@ pickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChanged
     app:textSize="18sp"
     app:type="dateTime"
     app:minutesInterval="fifteen"
+    app:curved="true"
     android:background="#e7e7e7"/>
 ```
 
