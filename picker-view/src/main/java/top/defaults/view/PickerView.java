@@ -152,8 +152,6 @@ public class PickerView extends View {
 
     private void initPaints() {
         textPaint = new Paint();
-        textPaint.setTextSize(textSize);
-        textPaint.setColor(textColor);
         textPaint.setAntiAlias(true);
     }
 
@@ -388,6 +386,7 @@ public class PickerView extends View {
 
     private void drawText(Canvas canvas, String text, float offset) {
         textPaint.setTextSize(textSize);
+        textPaint.setColor(textColor);
         textPaint.getTextBounds(text, 0, text.length(), textBounds);
 
         if (autoFitSize) {

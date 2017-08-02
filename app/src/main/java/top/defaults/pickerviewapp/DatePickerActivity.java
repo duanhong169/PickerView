@@ -1,5 +1,6 @@
 package top.defaults.pickerviewapp;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -26,6 +27,15 @@ public class DatePickerActivity extends AppCompatActivity {
         type++;
         type %= 4;
         dateTimePickerView.setType(type);
+        if (dateTimePickerView.getTimePickerView() != null) {
+            dateTimePickerView.getTimePickerView().setTextColor(Color.MAGENTA);
+        }
+        if (dateTimePickerView.getHourPickerView() != null) {
+            dateTimePickerView.getHourPickerView().setTextColor(Color.MAGENTA);
+        }
+        if (dateTimePickerView.getMinutePickerView() != null) {
+            dateTimePickerView.getMinutePickerView().setTextColor(Color.MAGENTA);
+        }
     }
     @OnCheckedChanged(R.id.curved) void toggle(boolean checked) {
         dateTimePickerView.setCurved(checked);
@@ -38,18 +48,25 @@ public class DatePickerActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         dateTimePickerView.setStartDate(Calendar.getInstance());
         dateTimePickerView.setSelectedDate(new GregorianCalendar(2017, 6, 27, 21, 30));
+        dateTimePickerView.getTimePickerView().setTextColor(Color.MAGENTA);
+        textView.setText(getDateString(dateTimePickerView.getSelectedDate()));
+
         dateTimePickerView.setOnSelectedDateChangedListener(new DateTimePickerView.OnSelectedDateChangedListener() {
             @Override
             public void onSelectedDateChanged(Calendar date) {
-                int year = date.get(Calendar.YEAR);
-                int month = date.get(Calendar.MONTH);
-                int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-                int hour = date.get(Calendar.HOUR_OF_DAY);
-                int minute = date.get(Calendar.MINUTE);
-                String dateString = String.format(Locale.getDefault(), "%d年%02d月%02d日%02d时%02d分", year, month + 1, dayOfMonth, hour, minute);
+                String dateString = getDateString(date);
                 textView.setText(dateString);
                 Log.d(TAG, "new date: " + dateString);
             }
         });
+    }
+
+    private String getDateString(Calendar date) {
+        int year = date.get(Calendar.YEAR);
+        int month = date.get(Calendar.MONTH);
+        int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int minute = date.get(Calendar.MINUTE);
+        return String.format(Locale.getDefault(), "%d年%02d月%02d日%02d时%02d分", year, month + 1, dayOfMonth, hour, minute);
     }
 }
