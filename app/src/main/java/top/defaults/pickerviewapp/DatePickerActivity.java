@@ -3,20 +3,17 @@ package top.defaults.pickerviewapp;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import top.defaults.view.DateTimePickerView;
-import top.defaults.view.PickerView;
 
 public class DatePickerActivity extends AppCompatActivity {
 

@@ -12,7 +12,7 @@
         android:id="@+id/datePickerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:preferredMaxOffsetItemCount="3"
+        app:preferredMaxOffsetItemCount="7"
         app:textSize="18sp"
         app:type="dateTime"
         app:minutesInterval="fifteen"

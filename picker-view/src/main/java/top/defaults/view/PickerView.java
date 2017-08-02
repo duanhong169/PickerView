@@ -25,6 +25,7 @@ import static top.defaults.view.Utils.checkNotNull;
 public class PickerView extends View {
 
     private static final String TAG = "PickerView";
+    private static final boolean DEBUG = false;
 
     static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
     private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
@@ -91,7 +92,10 @@ public class PickerView extends View {
                         minY,
                         maxY,
                         0, maxOverScrollY);
-                Log.d(TAG, "fling: " + yOffset + ", velocityY: " + velocityY);
+
+                if (DEBUG) {
+                    Log.d(TAG, "fling: " + previousScrollerY + ", velocityY: " + velocityY);
+                }
 
                 pendingJustify = true;
                 return true;
@@ -291,13 +295,11 @@ public class PickerView extends View {
             if (selectedItemPosition != newSelectedItemPosition) {
                 selectedItemPosition = newSelectedItemPosition;
                 changed = true;
-                Log.d(TAG, "selectedItemPosition: " + selectedItemPosition);
             }
         } else {
             if (selectedItemPosition != clampedNewSelectedItemPosition) {
                 selectedItemPosition = clampedNewSelectedItemPosition;
                 changed = true;
-                Log.d(TAG, "selectedItemPosition: " + selectedItemPosition);
             }
         }
 
@@ -350,7 +352,7 @@ public class PickerView extends View {
 
         // 绘制选中项上方的item
         itemPosition = selectedItemPosition - 1;
-        while (drawYOffset + itemHeight > 0) {
+        while (drawYOffset + (itemHeight * (curved ? 2 : 1)) > 0) {
             if (!isPositionValid(itemPosition) && !isCyclic) {
                 break;
             }
@@ -364,7 +366,7 @@ public class PickerView extends View {
         // 绘制选中项下方的item
         drawYOffset = this.yOffset + (getMeasuredHeight() + itemHeight) / 2;
         itemPosition = selectedItemPosition + 1;
-        while ((drawYOffset < getMeasuredHeight())) {
+        while (drawYOffset - (itemHeight * (curved ? 1: 0)) < getMeasuredHeight()) {
             if (!isPositionValid(itemPosition) && !isCyclic) {
                 break;
             }
@@ -398,7 +400,9 @@ public class PickerView extends View {
         float textBottom = offset + (itemHeight + (textBounds.height())) / 2;
 
         if (curved) {
-            double radian = Math.atan((radius - (offset + itemHeight / 2)) / radius) * (2f / preferredMaxOffsetItemCount);
+            // 根据当前item的offset换算得到对应的倾斜角度，rotateRatio用于减小倾斜角度，否则倾斜角度过大会导致视觉效果不佳
+            float rotateRatio = 2f / preferredMaxOffsetItemCount;
+            double radian = Math.atan((radius - (offset + itemHeight / 2)) / radius) * rotateRatio;
             float degree = (float) (radian * 180 / Math.PI);
             camera.save();
             camera.rotateX(degree);
@@ -461,7 +465,6 @@ public class PickerView extends View {
     @Override
     public void computeScroll() {
         if (scroller.computeScrollOffset()) {
-            Log.d(TAG, "scroller.getCurrY() = " + scroller.getCurrY());
             float dy = scroller.getCurrY() - previousScrollerY;
             handleOffset(dy);
             previousScrollerY = scroller.getCurrY();
@@ -517,16 +520,16 @@ public class PickerView extends View {
 
     // 对齐item
     private void justify(int duration) {
-        Log.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset);
-
         if (yOffset != 0) {
             previousScrollerY = yOffset - itemHeight * selectedItemPosition;
             scroller.startScroll(
                     0, (int) (yOffset - itemHeight * selectedItemPosition),
                     0, (int) -yOffset,
                     duration);
+            if (DEBUG) {
+                Log.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset);
+            }
 
-            Log.d(TAG, "startScroll: " + yOffset + ", by: " + (yOffset));
             invalidate();
         }
     }
