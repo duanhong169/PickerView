@@ -141,7 +141,7 @@ public class PickerView extends View {
 
         isCyclic = typedArray.getBoolean(R.styleable.PickerView_isCyclic, false);
         autoFitSize = typedArray.getBoolean(R.styleable.PickerView_autoFitSize, true);
-        curved = typedArray.getBoolean(R.styleable.PickerView_curved, true);
+        curved = typedArray.getBoolean(R.styleable.PickerView_curved, false);
         typedArray.recycle();
 
         initPaints();
