@@ -68,7 +68,7 @@ pickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChanged
 });
 ```
 
-2.2 集成DateTimePickerView
+#### 2.2 集成DateTimePickerView
 
 添加到layout文件中：
 
