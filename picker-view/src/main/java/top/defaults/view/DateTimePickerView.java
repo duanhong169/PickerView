@@ -484,6 +484,16 @@ public class DateTimePickerView extends PickerViewGroup {
                             }
                         } else {
                             CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
+
+                            CalendarField dayField = (CalendarField) dayPickerView.getAdapter().getItem(dayPickerView.getSelectedItemPosition());
+                            Calendar tempCalendar = (Calendar) selectedDate.clone();
+                            tempCalendar.set(Calendar.DAY_OF_MONTH, 1);
+                            tempCalendar.set(Calendar.MONTH, field.value);
+                            int days = tempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                            if (days < dayField.value) {
+                                selectedDate.set(Calendar.DAY_OF_MONTH, days);
+                            }
+
                             selectedDate.set(Calendar.MONTH, field.value);
                             dayPickerView.notifyDataSetChanged();
                         }
