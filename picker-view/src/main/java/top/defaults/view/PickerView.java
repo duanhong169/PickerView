@@ -438,12 +438,14 @@ public class PickerView extends View {
         float dy;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                pendingJustify = false;
                 if (!scroller.isFinished()) {
                     scroller.forceFinished(true);
                 }
                 previousTouchedY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
+                pendingJustify = false;
                 dy = event.getY() - previousTouchedY;
                 handleOffset(dy);
                 previousTouchedY = event.getY();
@@ -520,10 +522,21 @@ public class PickerView extends View {
     // 对齐item
     private void justify(int duration) {
         if (yOffset != 0) {
+            float scrollOffset = -yOffset;
+            if (yOffset > 0) {
+                if (yOffset > itemHeight / 2) {
+                    scrollOffset = itemHeight - yOffset;
+                }
+            } else {
+                if (Math.abs(yOffset) > itemHeight / 2) {
+                    scrollOffset = -(itemHeight + yOffset);
+                }
+            }
+
             previousScrollerY = yOffset - itemHeight * selectedItemPosition;
             scroller.startScroll(
                     0, (int) (yOffset - itemHeight * selectedItemPosition),
-                    0, (int) -yOffset,
+                    0, (int) scrollOffset,
                     duration);
             if (DEBUG) {
                 Log.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset);
