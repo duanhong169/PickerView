@@ -40,8 +40,8 @@ public class PickerView extends View {
     private OverScroller scroller;
     private boolean pendingJustify;
     private float previousTouchedY;
-    private float previousScrollerY;
-    private float yOffset;
+    private int previousScrollerY;
+    private int yOffset;
     private int minY;
     private int maxY;
     private int maxOverScrollY;
@@ -86,7 +86,7 @@ public class PickerView extends View {
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 previousScrollerY = yOffset - itemHeight * selectedItemPosition;
                 scroller.fling(
-                        0, (int) (yOffset - itemHeight * selectedItemPosition),
+                        0, previousScrollerY,
                         0, (int) velocityY,
                         0, 0,
                         minY,
@@ -342,7 +342,7 @@ public class PickerView extends View {
 
     private void drawItems(Canvas canvas) {
          // 绘制选中项
-        float drawYOffset = this.yOffset + (getMeasuredHeight() - itemHeight) / 2;
+        float drawYOffset = yOffset + (getMeasuredHeight() - itemHeight) / 2;
         int itemPosition = selectedItemPosition;
         String text = adapter.getText(clampItemPosition(itemPosition));
         drawText(canvas, text, drawYOffset);
@@ -351,7 +351,7 @@ public class PickerView extends View {
         // 绘制选中项上方的item
         itemPosition = selectedItemPosition - 1;
         while (drawYOffset + (itemHeight * (curved ? 2 : 1)) > 0) {
-            if (!isPositionValid(itemPosition) && !isCyclic) {
+            if (isPositionInvalid(itemPosition) && !isCyclic) {
                 break;
             }
 
@@ -362,10 +362,10 @@ public class PickerView extends View {
         }
 
         // 绘制选中项下方的item
-        drawYOffset = this.yOffset + (getMeasuredHeight() + itemHeight) / 2;
+        drawYOffset = yOffset + (getMeasuredHeight() + itemHeight) / 2;
         itemPosition = selectedItemPosition + 1;
         while (drawYOffset - (itemHeight * (curved ? 1: 0)) < getMeasuredHeight()) {
-            if (!isPositionValid(itemPosition) && !isCyclic) {
+            if (isPositionInvalid(itemPosition) && !isCyclic) {
                 break;
             }
 
@@ -435,7 +435,7 @@ public class PickerView extends View {
             return true;
         }
 
-        float dy;
+        int dy;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 pendingJustify = false;
@@ -446,14 +446,14 @@ public class PickerView extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 pendingJustify = false;
-                dy = event.getY() - previousTouchedY;
+                dy = (int) (event.getY() - previousTouchedY);
                 handleOffset(dy);
                 previousTouchedY = event.getY();
                 break;
             case MotionEvent.ACTION_UP:
             default:
                 // align items
-                dy = event.getY() - previousTouchedY;
+                dy = (int) (event.getY() - previousTouchedY);
                 handleOffset(dy);
                 justify(250);
                 break;
@@ -466,7 +466,7 @@ public class PickerView extends View {
     @Override
     public void computeScroll() {
         if (scroller.computeScrollOffset()) {
-            float dy = scroller.getCurrY() - previousScrollerY;
+            int dy = scroller.getCurrY() - previousScrollerY;
             handleOffset(dy);
             previousScrollerY = scroller.getCurrY();
             invalidate();
@@ -495,8 +495,8 @@ public class PickerView extends View {
         notifySelectedItemChangedIfNeeded(newSelectedItemPosition);
     }
 
-    private boolean isPositionValid(int itemPosition) {
-        return itemPosition >= 0 && itemPosition < adapter.getItemCount();
+    private boolean isPositionInvalid(int itemPosition) {
+        return itemPosition < 0 || itemPosition >= adapter.getItemCount();
     }
 
     private int clampItemPosition(int itemPosition) {
@@ -522,7 +522,7 @@ public class PickerView extends View {
     // 对齐item
     private void justify(int duration) {
         if (yOffset != 0) {
-            float scrollOffset = -yOffset;
+            int scrollOffset = -yOffset;
             if (yOffset > 0) {
                 if (yOffset > itemHeight / 2) {
                     scrollOffset = itemHeight - yOffset;
@@ -535,19 +535,23 @@ public class PickerView extends View {
 
             previousScrollerY = yOffset - itemHeight * selectedItemPosition;
             scroller.startScroll(
-                    0, (int) (yOffset - itemHeight * selectedItemPosition),
-                    0, (int) scrollOffset,
+                    0, previousScrollerY,
+                    0, scrollOffset,
                     duration);
             if (DEBUG) {
-                Log.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset);
+                Log.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset + ", scrollOffset = " + scrollOffset);
             }
 
             invalidate();
         }
     }
 
-    private void handleOffset(float dy) {
+    private void handleOffset(int dy) {
         yOffset += dy;
+        if (DEBUG) {
+            Log.d(TAG, "yOffset = " + yOffset + ", dy = " + dy);
+        }
+
         if (Math.abs(yOffset) >= itemHeight) {
             // 滚动到边界时
             if (selectedItemPosition == 0 && dy >= 0 || selectedItemPosition == adapter.getItemCount() - 1 && dy <= 0) {
@@ -558,7 +562,7 @@ public class PickerView extends View {
             }
 
             int preSelection = selectedItemPosition;
-            notifySelectedItemChangedIfNeeded(selectedItemPosition - ((int) yOffset / itemHeight));
+            notifySelectedItemChangedIfNeeded(selectedItemPosition - (yOffset / itemHeight));
             yOffset -= (preSelection - selectedItemPosition) * itemHeight;
         }
     }
