@@ -8,10 +8,12 @@ Android滚动选择器
 
 ### 1. 添加依赖
 
+> 注：${latestVersion}请替换为当前最新版本号。
+
 gradle：
 	
 ```
-compile 'com.github.duanhong169:picker-view:0.2.0'
+compile 'com.github.duanhong169:picker-view:${latestVersion}'
 ```
 
 maven：
@@ -20,7 +22,7 @@ maven：
 <dependency>
 	<groupId>com.github.duanhong169</groupId>
 	<artifactId>picker-view</artifactId>
-	<version>0.2.0</version>
+	<version>${latestVersion}</version>
 	<type>pom</type>
 </dependency>
 ```
