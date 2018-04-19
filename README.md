@@ -13,7 +13,7 @@ Android滚动选择器
 gradle：
 	
 ```
-compile 'com.github.duanhong169:picker-view:${latestVersion}'
+implementation 'com.github.duanhong169:picker-view:${latestVersion}'
 ```
 
 maven：
