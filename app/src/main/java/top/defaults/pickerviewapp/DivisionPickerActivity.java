@@ -13,8 +13,6 @@ import top.defaults.view.PickerView;
 
 public class DivisionPickerActivity extends AppCompatActivity {
 
-    private static final String TAG = "DivisionPickerActivity";
-
     @BindView(R.id.provincePicker) PickerView provincePicker;
     @BindView(R.id.cityPicker) PickerView cityPicker;
     @BindView(R.id.divisionPicker) PickerView divisionPicker;

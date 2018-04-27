@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import static top.defaults.view.Utils.checkNotNull;
 
+@SuppressWarnings("unused")
 public class DateTimePickerView extends PickerViewGroup {
 
     public static final int TYPE_DATE_TIME = 0;

@@ -12,7 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.text.Layout;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,8 +19,11 @@ import android.widget.OverScroller;
 
 import java.lang.ref.WeakReference;
 
+import top.defaults.logger.Logger;
+
 import static top.defaults.view.Utils.checkNotNull;
 
+@SuppressWarnings("unused")
 public class PickerView extends View {
 
     private static final String TAG = "PickerView";
@@ -94,7 +96,7 @@ public class PickerView extends View {
                         0, maxOverScrollY);
 
                 if (DEBUG) {
-                    Log.d(TAG, "fling: " + previousScrollerY + ", velocityY: " + velocityY);
+                    Logger.d(TAG, "fling: " + previousScrollerY + ", velocityY: " + velocityY);
                 }
 
                 pendingJustify = true;
@@ -179,6 +181,7 @@ public class PickerView extends View {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public abstract static class Adapter {
         private WeakReference<PickerView> pickerViewRef;
 
@@ -451,7 +454,6 @@ public class PickerView extends View {
                 previousTouchedY = event.getY();
                 break;
             case MotionEvent.ACTION_UP:
-            default:
                 // align items
                 dy = (int) (event.getY() - previousTouchedY);
                 handleOffset(dy);
@@ -539,7 +541,7 @@ public class PickerView extends View {
                     0, scrollOffset,
                     duration);
             if (DEBUG) {
-                Log.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset + ", scrollOffset = " + scrollOffset);
+                Logger.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset + ", scrollOffset = " + scrollOffset);
             }
 
             invalidate();
@@ -549,7 +551,7 @@ public class PickerView extends View {
     private void handleOffset(int dy) {
         yOffset += dy;
         if (DEBUG) {
-            Log.d(TAG, "yOffset = " + yOffset + ", dy = " + dy);
+            Logger.d(TAG, "yOffset = " + yOffset + ", dy = " + dy);
         }
 
         if (Math.abs(yOffset) >= itemHeight) {

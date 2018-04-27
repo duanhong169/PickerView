@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 
 import static top.defaults.view.PickerView.DEFAULT_MAX_OFFSET_ITEM_COUNT;
 
+@SuppressWarnings("unused")
 public class PickerViewGroup extends LinearLayout {
 
     protected int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;

@@ -3,7 +3,6 @@ package top.defaults.pickerviewapp;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.TextView;
 
 import java.util.Calendar;
@@ -14,11 +13,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
+import top.defaults.logger.Logger;
 import top.defaults.view.DateTimePickerView;
 
 public class DatePickerActivity extends AppCompatActivity {
 
-    private static final String TAG = "DatePickerActivity";
     private int type = DateTimePickerView.TYPE_DATE_TIME;
 
     @BindView(R.id.datePickerView) DateTimePickerView dateTimePickerView;
@@ -56,7 +55,7 @@ public class DatePickerActivity extends AppCompatActivity {
             public void onSelectedDateChanged(Calendar date) {
                 String dateString = getDateString(date);
                 textView.setText(dateString);
-                Log.d(TAG, "new date: " + dateString);
+                Logger.d("new date: %s", dateString);
             }
         });
     }
