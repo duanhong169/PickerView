@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.OverScroller;
 
 import java.lang.ref.WeakReference;
@@ -26,8 +27,7 @@ import static top.defaults.view.Utils.checkNotNull;
 @SuppressWarnings("unused")
 public class PickerView extends View {
 
-    private static final String TAG = "PickerView";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
     private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
@@ -40,13 +40,17 @@ public class PickerView extends View {
 
     private GestureDetector gestureDetector;
     private OverScroller scroller;
+    private boolean scrolling;
     private boolean pendingJustify;
+    private boolean isScrollSuspendedByDownEvent;
+    private float actionDownY;
     private float previousTouchedY;
     private int previousScrollerY;
     private int yOffset;
     private int minY;
     private int maxY;
     private int maxOverScrollY;
+    private int touchSlop;
 
     private int itemHeight;
     private int textSize;
@@ -86,9 +90,15 @@ public class PickerView extends View {
         gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                previousScrollerY = yOffset - itemHeight * selectedItemPosition;
+                int startScrollerY = yOffset - itemHeight * selectedItemPosition;
+
+                if (startScrollerY <= minY || startScrollerY >= maxY) {
+                    justify(1000);
+                    return true;
+                }
+
                 scroller.fling(
-                        0, previousScrollerY,
+                        0, startScrollerY,
                         0, (int) velocityY,
                         0, 0,
                         minY,
@@ -96,14 +106,16 @@ public class PickerView extends View {
                         0, maxOverScrollY);
 
                 if (DEBUG) {
-                    Logger.d(TAG, "fling: " + previousScrollerY + ", velocityY: " + velocityY);
+                    Logger.d("fling: " + startScrollerY + ", velocityY: " + velocityY);
                 }
 
+                previousScrollerY = scroller.getCurrY();
                 pendingJustify = true;
                 return true;
             }
         });
         scroller = new OverScroller(getContext());
+        touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         if (isInEditMode()) {
             adapter = new Adapter() {
@@ -432,32 +444,59 @@ public class PickerView extends View {
     }
 
     @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (gestureDetector.onTouchEvent(event)) {
             invalidate();
             return true;
         }
 
+        float y = event.getY();
         int dy;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 pendingJustify = false;
+                actionDownY = y;
+                previousTouchedY = y;
+                scrolling = false;
                 if (!scroller.isFinished()) {
                     scroller.forceFinished(true);
+                    isScrollSuspendedByDownEvent = true;
                 }
-                previousTouchedY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
+                if (!scrolling && Math.abs(y - actionDownY) <= touchSlop) {
+                    break;
+                }
+                if (!scrolling) {
+                    scrolling = true;
+                    previousTouchedY = y;
+                    break;
+                }
                 pendingJustify = false;
                 dy = (int) (event.getY() - previousTouchedY);
                 handleOffset(dy);
-                previousTouchedY = event.getY();
+                previousTouchedY = y;
                 break;
             case MotionEvent.ACTION_UP:
+                if (!isScrollSuspendedByDownEvent && !scrolling && Math.abs(y - actionDownY) <= touchSlop) {
+                    // 单击事件
+                    performClick();
+                    break;
+                }
+                scrolling = false;
+                isScrollSuspendedByDownEvent = false;
+
                 // align items
-                dy = (int) (event.getY() - previousTouchedY);
+                dy = (int) (y - previousTouchedY);
                 handleOffset(dy);
                 justify(250);
+                break;
+            default:
                 break;
         }
 
@@ -468,14 +507,17 @@ public class PickerView extends View {
     @Override
     public void computeScroll() {
         if (scroller.computeScrollOffset()) {
-            int dy = scroller.getCurrY() - previousScrollerY;
+            int scrollerY = scroller.getCurrY();
+            if (DEBUG) {
+                Logger.d("scrollerY = %d, previousScrollerY = %d", scrollerY, previousScrollerY);
+            }
+            int dy = scrollerY - previousScrollerY;
             handleOffset(dy);
-            previousScrollerY = scroller.getCurrY();
+            previousScrollerY = scrollerY;
             invalidate();
         } else {
             if (pendingJustify) {
                 justify(250);
-                pendingJustify = false;
             }
         }
     }
@@ -525,13 +567,15 @@ public class PickerView extends View {
     private void justify(int duration) {
         if (yOffset != 0) {
             int scrollOffset = -yOffset;
-            if (yOffset > 0) {
-                if (yOffset > itemHeight / 2) {
-                    scrollOffset = itemHeight - yOffset;
-                }
-            } else {
-                if (Math.abs(yOffset) > itemHeight / 2) {
-                    scrollOffset = -(itemHeight + yOffset);
+            if (selectedItemPosition != 0 && selectedItemPosition != adapter.getItemCount() - 1) {
+                if (yOffset > 0) {
+                    if (yOffset > itemHeight / 2) {
+                        scrollOffset = itemHeight - yOffset;
+                    }
+                } else {
+                    if (Math.abs(yOffset) > itemHeight / 2) {
+                        scrollOffset = -(itemHeight + yOffset);
+                    }
                 }
             }
 
@@ -541,24 +585,25 @@ public class PickerView extends View {
                     0, scrollOffset,
                     duration);
             if (DEBUG) {
-                Logger.d(TAG, "justify: duration = " + duration + ", yOffset = " + yOffset + ", scrollOffset = " + scrollOffset);
+                Logger.d("justify: duration = %d, yOffset = %d, scrollOffset = %d", duration, yOffset, scrollOffset);
             }
 
             invalidate();
         }
+        pendingJustify = false;
     }
 
     private void handleOffset(int dy) {
-        yOffset += dy;
         if (DEBUG) {
-            Logger.d(TAG, "yOffset = " + yOffset + ", dy = " + dy);
+            Logger.d("yOffset = %d, dy = %d", yOffset, dy);
         }
+        yOffset += dy;
 
         if (Math.abs(yOffset) >= itemHeight) {
             // 滚动到边界时
             if (selectedItemPosition == 0 && dy >= 0 || selectedItemPosition == adapter.getItemCount() - 1 && dy <= 0) {
                 if (Math.abs(yOffset) > maxOverScrollY) {
-                    yOffset = yOffset > 0 ? maxOverScrollY : - maxOverScrollY;
+                    yOffset = yOffset > 0 ? maxOverScrollY : -maxOverScrollY;
                 }
                 return;
             }
