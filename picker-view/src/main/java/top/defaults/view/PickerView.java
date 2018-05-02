@@ -27,11 +27,14 @@ import static top.defaults.view.Utils.checkNotNull;
 @SuppressWarnings("unused")
 public class PickerView extends View {
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
     private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
     private int selectedItemPosition;
+
+    private static final int DURATION_SHORT = 250;
+    private static final int DURATION_LONG = 1000;
 
     private Adapter adapter;
 
@@ -93,7 +96,7 @@ public class PickerView extends View {
                 int startScrollerY = yOffset - itemHeight * selectedItemPosition;
 
                 if (startScrollerY <= minY || startScrollerY >= maxY) {
-                    justify(1000);
+                    justify(DURATION_LONG);
                     return true;
                 }
 
@@ -478,7 +481,7 @@ public class PickerView extends View {
                     break;
                 }
                 pendingJustify = false;
-                dy = (int) (event.getY() - previousTouchedY);
+                dy = (int) (y - previousTouchedY);
                 handleOffset(dy);
                 previousTouchedY = y;
                 break;
@@ -486,6 +489,27 @@ public class PickerView extends View {
                 if (!isScrollSuspendedByDownEvent && !scrolling && Math.abs(y - actionDownY) <= touchSlop) {
                     // 单击事件
                     performClick();
+                    previousScrollerY = yOffset - itemHeight * selectedItemPosition;
+                    // 最近的整数倍数的单元格高度
+                    int centerItemTopY = (getMeasuredHeight() - itemHeight) / 2;
+                    int centerItemBottomY = (getMeasuredHeight() + itemHeight) / 2;
+                    if (y >= centerItemTopY && y <= centerItemBottomY) break;
+
+                    int scrollOffset;
+                    if (y < centerItemTopY) {
+                        scrollOffset = ((int) y - centerItemBottomY) / itemHeight * itemHeight;
+                        if (selectedItemPosition + scrollOffset / itemHeight < 0) break;
+                    } else {
+                        scrollOffset = ((int) y - centerItemTopY) / itemHeight * itemHeight;
+                        if (selectedItemPosition + scrollOffset / itemHeight > adapter.getItemCount() - 1) break;
+                    }
+                    scroller.startScroll(
+                            0, previousScrollerY,
+                            0, -scrollOffset,
+                            DURATION_SHORT);
+                    if (DEBUG) {
+                        Logger.d("scrollOffset = %d", scrollOffset);
+                    }
                     break;
                 }
                 scrolling = false;
@@ -494,7 +518,7 @@ public class PickerView extends View {
                 // align items
                 dy = (int) (y - previousTouchedY);
                 handleOffset(dy);
-                justify(250);
+                justify(DURATION_SHORT);
                 break;
             default:
                 break;
@@ -517,7 +541,7 @@ public class PickerView extends View {
             invalidate();
         } else {
             if (pendingJustify) {
-                justify(250);
+                justify(DURATION_SHORT);
             }
         }
     }
