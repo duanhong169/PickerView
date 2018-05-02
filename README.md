@@ -8,7 +8,7 @@ Android滚动选择器
 
 ### 1. 添加依赖
 
-> 注：${latestVersion}请替换为当前最新版本号。
+> 注：${latestVersion}请替换为当前最新版本号，见[releases](https://github.com/duanhong169/PickerView/releases)。
 
 gradle：
 	
