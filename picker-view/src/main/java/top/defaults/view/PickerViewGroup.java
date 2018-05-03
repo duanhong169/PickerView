@@ -33,9 +33,9 @@ public class PickerViewGroup extends LinearLayout {
 
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.PickerViewGroup);
         preferredMaxOffsetItemCount = typedArray.getInt(R.styleable.PickerViewGroup_preferredMaxOffsetItemCount, DEFAULT_MAX_OFFSET_ITEM_COUNT);
-        int defaultItemHeight = Utils.pixelOfDp(getContext(), 32);
+        int defaultItemHeight = Utils.pixelOfDp(getContext(), PickerView.DEFAULT_ITEM_HEIGHT_IN_DP);
         itemHeight = typedArray.getDimensionPixelSize(R.styleable.PickerViewGroup_itemHeight, defaultItemHeight);
-        int defaultTextSize = Utils.pixelOfScaled(getContext(), 22);
+        int defaultTextSize = Utils.pixelOfScaled(getContext(), PickerView.DEFAULT_TEXT_SIZE_IN_SP);
         textSize = typedArray.getDimensionPixelSize(R.styleable.PickerViewGroup_textSize, defaultTextSize);
         textColor = typedArray.getColor(R.styleable.PickerViewGroup_textColor, Color.BLACK);
         autoFitSize = typedArray.getBoolean(R.styleable.PickerViewGroup_autoFitSize, true);

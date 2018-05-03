@@ -29,6 +29,8 @@ public class PickerView extends View {
 
     private static final boolean DEBUG = false;
 
+    static final int DEFAULT_TEXT_SIZE_IN_SP = 14;
+    static final int DEFAULT_ITEM_HEIGHT_IN_DP = 24;
     static final int DEFAULT_MAX_OFFSET_ITEM_COUNT = 3;
     private int preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
     private int selectedItemPosition;
@@ -148,11 +150,11 @@ public class PickerView extends View {
         preferredMaxOffsetItemCount = typedArray.getInt(R.styleable.PickerView_preferredMaxOffsetItemCount, DEFAULT_MAX_OFFSET_ITEM_COUNT);
         if (preferredMaxOffsetItemCount <= 0) preferredMaxOffsetItemCount = DEFAULT_MAX_OFFSET_ITEM_COUNT;
 
-        int defaultItemHeight = Utils.pixelOfDp(getContext(), 32);
+        int defaultItemHeight = Utils.pixelOfDp(getContext(), DEFAULT_ITEM_HEIGHT_IN_DP);
         itemHeight = typedArray.getDimensionPixelSize(R.styleable.PickerView_itemHeight, defaultItemHeight);
         if (itemHeight <= 0) itemHeight = defaultItemHeight;
 
-        int defaultTextSize = Utils.pixelOfScaled(getContext(), 22);
+        int defaultTextSize = Utils.pixelOfScaled(getContext(), DEFAULT_TEXT_SIZE_IN_SP);
         textSize = typedArray.getDimensionPixelSize(R.styleable.PickerView_textSize, defaultTextSize);
         textColor = typedArray.getColor(R.styleable.PickerView_textColor, Color.BLACK);
 
