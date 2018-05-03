@@ -31,4 +31,12 @@
         android:textAllCaps="false"
         android:text="日期选择"/>
 
+    <Button
+        android:id="@+id/pickerDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:textAllCaps="false"
+        android:text="弹出对话框选择"/>
+
 </LinearLayout>

@@ -20,6 +20,7 @@
         <activity android:name=".DefaultPickerActivity"/>
         <activity android:name=".DivisionPickerActivity"/>
         <activity android:name=".DatePickerActivity"/>
+        <activity android:name=".PickerDialogActivity"/>
     </application>
 
 </manifest>

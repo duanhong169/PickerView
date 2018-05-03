@@ -21,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(this, DatePickerActivity.class));
     }
 
+    @OnClick(R.id.pickerDialog) void pickerDialog() {
+        startActivity(new Intent(this, PickerDialogActivity.class));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
