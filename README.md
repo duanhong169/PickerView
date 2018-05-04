@@ -13,13 +13,13 @@ Android滚动选择器
 
 gradle：
 	
-```
+```groovy
 implementation 'com.github.duanhong169:picker-view:${latestVersion}'
 ```
 
 maven：
 	
-```
+```xml
 <dependency>
 	<groupId>com.github.duanhong169</groupId>
 	<artifactId>picker-view</artifactId>
@@ -34,7 +34,7 @@ maven：
 
 添加到layout文件中：
 
-```	
+```xml
 <top.defaults.view.PickerView
 	android:id="@+id/pickerView"
 	android:layout_width="match_parent"
@@ -83,7 +83,7 @@ pickerView.setOnSelectedItemChangedListener((pickerView, previousPosition, selec
 
 添加到layout文件中：
 
-```
+```xml
 <top.defaults.view.DivisionPickerView
     android:id="@+id/divisionPicker"
     android:layout_width="match_parent"
@@ -108,7 +108,7 @@ divisionPicker.setOnSelectedDateChangedListener(division -> textView.setText(Div
 
 添加到layout文件中：
 
-```	
+```xml
 <top.defaults.view.DateTimePickerView
     android:id="@+id/datePickerView"
     android:layout_width="match_parent"
