@@ -50,13 +50,10 @@ public class DatePickerActivity extends AppCompatActivity {
         dateTimePickerView.getTimePickerView().setTextColor(Color.MAGENTA);
         textView.setText(getDateString(dateTimePickerView.getSelectedDate()));
 
-        dateTimePickerView.setOnSelectedDateChangedListener(new DateTimePickerView.OnSelectedDateChangedListener() {
-            @Override
-            public void onSelectedDateChanged(Calendar date) {
-                String dateString = getDateString(date);
-                textView.setText(dateString);
-                Logger.d("new date: %s", dateString);
-            }
+        dateTimePickerView.setOnSelectedDateChangedListener(date -> {
+            String dateString = getDateString(date);
+            textView.setText(dateString);
+            Logger.d("new date: %s", dateString);
         });
     }
 

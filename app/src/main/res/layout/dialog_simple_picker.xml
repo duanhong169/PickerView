@@ -7,32 +7,26 @@
     android:orientation="vertical"
     android:background="#e7e7e7">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:weightSum="6">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/cancel"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:padding="8dp"
             android:text="@string/cancel"/>
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"/>
-
-        <TextView
             android:id="@+id/done"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="end"
+            android:padding="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
             android:text="@string/done"/>
-    </LinearLayout>
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"

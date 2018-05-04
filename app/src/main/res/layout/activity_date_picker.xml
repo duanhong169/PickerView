@@ -13,8 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:preferredMaxOffsetItemCount="4"
-        app:textSize="18sp"
-        app:textColor="@color/colorAccent"
         app:type="dateTime"
         app:minutesInterval="fifteen"
         android:background="#e7e7e7"/>
@@ -23,7 +21,7 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorAccent"
         android:gravity="center"/>
 
     <Button

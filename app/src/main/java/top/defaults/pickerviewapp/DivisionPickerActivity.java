@@ -42,21 +42,18 @@ public class DivisionPickerActivity extends AppCompatActivity {
 
         textView.setText(getSelectedDivisionName());
 
-        PickerView.OnSelectedItemChangedListener listener = new PickerView.OnSelectedItemChangedListener() {
-            @Override
-            public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                switch (pickerView.getId()) {
-                    case R.id.provincePicker:
-                        cityAdapter.setDivisions(provisionAdapter.getItem(provincePicker.getSelectedItemPosition()).getChildren());
-                        divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
-                        break;
-                    case R.id.cityPicker:
-                        divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
-                        break;
-                }
-
-                textView.setText(getSelectedDivisionName());
+        PickerView.OnSelectedItemChangedListener listener = (pickerView, previousPosition, selectedItemPosition) -> {
+            switch (pickerView.getId()) {
+                case R.id.provincePicker:
+                    cityAdapter.setDivisions(provisionAdapter.getItem(provincePicker.getSelectedItemPosition()).getChildren());
+                    divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
+                    break;
+                case R.id.cityPicker:
+                    divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
+                    break;
             }
+
+            textView.setText(getSelectedDivisionName());
         };
 
         provincePicker.setOnSelectedItemChangedListener(listener);
@@ -70,26 +67,5 @@ public class DivisionPickerActivity extends AppCompatActivity {
         String division = divisionAdapter.getText(divisionPicker.getSelectedItemPosition());
 
         return String.format(Locale.US, "%s%s%s", province, city, division);
-    }
-
-    private static class DivisionAdapter extends PickerView.Adapter {
-
-        private List<Divisions.Division> divisions;
-
-        private void setDivisions(List<Divisions.Division> divisions) {
-            this.divisions = divisions;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getItemCount() {
-            return divisions == null ? 0 : divisions.size();
-        }
-
-
-        @Override
-        public Divisions.Division getItem(int index) {
-            return divisions.get(index);
-        }
     }
 }

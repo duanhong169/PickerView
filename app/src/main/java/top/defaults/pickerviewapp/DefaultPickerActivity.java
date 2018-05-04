@@ -34,27 +34,10 @@ public class DefaultPickerActivity extends AppCompatActivity {
         };
 
         pickerView.setAdapter(adapter);
-        pickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChangedListener() {
-            @Override
-            public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                Logger.d("selectedItemPosition: %d", selectedItemPosition);
-                textView.setText(pickerView.getAdapter().getText(selectedItemPosition));
-            }
+        pickerView.setOnSelectedItemChangedListener((pickerView, previousPosition, selectedItemPosition) -> {
+            Logger.d("selectedItemPosition: %d", selectedItemPosition);
+            textView.setText(pickerView.getAdapter().getText(selectedItemPosition));
         });
         pickerView.setSelectedItemPosition(4);
-    }
-
-    private static class Item implements PickerView.PickerItem {
-
-        private String text;
-
-        Item(String s) {
-            text = s;
-        }
-
-        @Override
-        public String getText() {
-            return text;
-        }
     }
 }

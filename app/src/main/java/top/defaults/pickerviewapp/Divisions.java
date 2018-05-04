@@ -48,13 +48,17 @@ public class Divisions {
             return children;
         }
 
+        public Division getParent() {
+            return parent;
+        }
+
         @Override
         public String getText() {
             return name;
         }
     }
 
-    static List<Division> get(Context context) {
+    public static List<Division> get(Context context) {
         if (divisions != null) {
             return divisions;
         }

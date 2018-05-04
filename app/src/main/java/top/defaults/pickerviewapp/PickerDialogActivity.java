@@ -2,24 +2,66 @@ package top.defaults.pickerviewapp;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import top.defaults.view.PickerView;
-import top.defaults.view.PickerViewDialog;
+import top.defaults.pickerviewapp.dialog.ActionListener;
+import top.defaults.pickerviewapp.dialog.DivisionPickerDialog;
+import top.defaults.pickerviewapp.dialog.SimplePickerDialog;
+import top.defaults.pickerviewapp.dialog.TypeDialogFragment;
 
 public class PickerDialogActivity extends AppCompatActivity {
 
     @BindView(R.id.textView) TextView textView;
+    @BindView(R.id.sampleChooser) RadioGroup sampleChooser;
 
-    PickerViewDialog dialog;
+    ActionListener actionListener = new ActionListener() {
+        @Override
+        public void onCancelClick(TypeDialogFragment dialog) {}
 
-    @OnClick(R.id.button)
-    void pick() {
-        dialog.show();
+        @Override
+        public void onDoneClick(TypeDialogFragment dialog) {
+            if (dialog instanceof SimplePickerDialog) {
+                textView.setText(((SimplePickerDialog) dialog).getSelectedItem().getText());
+            } else if (dialog instanceof DivisionPickerDialog) {
+                Divisions.Division division = ((DivisionPickerDialog) dialog).getSelectedDivision();
+                StringBuilder text = new StringBuilder(division.getText());
+                while (division.getParent() != null) {
+                    division = division.getParent();
+                    text.insert(0, division.getText());
+                }
+                textView.setText(text.toString());
+            }
+        }
+    };
+
+    @OnClick(R.id.withView)
+    void withView() {
+        choosePicker(TypeDialogFragment.TYPE_VIEW).show(getFragmentManager(), "view");
+    }
+
+    @OnClick(R.id.withDialog)
+    void withDialog() {
+        choosePicker(TypeDialogFragment.TYPE_DIALOG).show(getFragmentManager(), "dialog");
+    }
+
+    TypeDialogFragment choosePicker(int type) {
+        TypeDialogFragment picker;
+
+        switch (sampleChooser.getCheckedRadioButtonId()) {
+            case R.id.division:
+                picker = DivisionPickerDialog.newInstance(type, actionListener);
+                break;
+            case R.id.simple:
+            default:
+                picker = SimplePickerDialog.newInstance(type, actionListener);
+                break;
+        }
+
+        return picker;
     }
 
     @Override
@@ -27,48 +69,5 @@ public class PickerDialogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picker_dialog);
         ButterKnife.bind(this);
-
-        dialog = new PickerViewDialog(this);
-        dialog.setContentView(R.layout.dialog_default_picker);
-
-        PickerView pickerView = dialog.findViewById(R.id.pickerView);
-        PickerView.Adapter adapter = new PickerView.Adapter() {
-
-            @Override
-            public int getItemCount() {
-                return 42;
-            }
-
-            @Override
-            public Item getItem(int index) {
-                return new Item("Item " + index);
-            }
-        };
-
-        pickerView.setAdapter(adapter);
-        pickerView.setSelectedItemPosition(4);
-
-        View cancel = dialog.findViewById(R.id.cancel);
-        cancel.setOnClickListener(v -> dialog.dismiss());
-
-        View done = dialog.findViewById(R.id.done);
-        done.setOnClickListener(v -> {
-            textView.setText(adapter.getText(pickerView.getSelectedItemPosition()));
-            dialog.dismiss();
-        });
-    }
-
-    private static class Item implements PickerView.PickerItem {
-
-        private String text;
-
-        Item(String s) {
-            text = s;
-        }
-
-        @Override
-        public String getText() {
-            return text;
-        }
     }
 }
