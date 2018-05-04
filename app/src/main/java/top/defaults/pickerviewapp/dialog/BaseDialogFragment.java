@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class TypeDialogFragment extends DialogFragment {
+public abstract class BaseDialogFragment extends DialogFragment {
 
     public static final int TYPE_DIALOG = 0;
     public static final int TYPE_VIEW = 1;
@@ -16,7 +16,7 @@ public abstract class TypeDialogFragment extends DialogFragment {
 
     protected ActionListener actionListener;
 
-    public static <T extends TypeDialogFragment> T newInstance(Class<T> cls, int type, ActionListener actionListener) {
+    public static <T extends BaseDialogFragment> T newInstance(Class<T> cls, int type, ActionListener actionListener) {
         T dialogFragment;
         try {
             dialogFragment = cls.newInstance();
@@ -62,4 +62,19 @@ public abstract class TypeDialogFragment extends DialogFragment {
     protected abstract Dialog createDialog(Bundle savedInstanceState);
 
     protected abstract View createView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState);
+
+    protected void attachActions(View done, View cancel) {
+        cancel.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onCancelClick(this);
+            }
+            dismiss();
+        });
+        done.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onDoneClick(this);
+            }
+            dismiss();
+        });
+    }
 }

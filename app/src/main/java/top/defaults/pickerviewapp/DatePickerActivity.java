@@ -45,8 +45,8 @@ public class DatePickerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_date_picker);
         ButterKnife.bind(this);
-        dateTimePickerView.setStartDate(Calendar.getInstance());
-        dateTimePickerView.setSelectedDate(new GregorianCalendar(2017, 6, 27, 21, 30));
+        dateTimePickerView.setStartDate(new GregorianCalendar(2017, 6, 27, 21, 30));
+        dateTimePickerView.setSelectedDate(Calendar.getInstance());
         dateTimePickerView.getTimePickerView().setTextColor(Color.MAGENTA);
         textView.setText(getDateString(dateTimePickerView.getSelectedDate()));
 

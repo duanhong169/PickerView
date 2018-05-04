@@ -2,7 +2,7 @@ package top.defaults.pickerviewapp.dialog;
 
 public interface ActionListener {
 
-    void onCancelClick(TypeDialogFragment dialog);
+    void onCancelClick(BaseDialogFragment dialog);
 
-    void onDoneClick(TypeDialogFragment dialog);
+    void onDoneClick(BaseDialogFragment dialog);
 }

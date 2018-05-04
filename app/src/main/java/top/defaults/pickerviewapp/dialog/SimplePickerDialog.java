@@ -12,7 +12,7 @@ import top.defaults.pickerviewapp.R;
 import top.defaults.view.PickerView;
 import top.defaults.view.PickerViewDialog;
 
-public class SimplePickerDialog extends TypeDialogFragment {
+public class SimplePickerDialog extends BaseDialogFragment {
 
     PickerView.Adapter<Item> adapter = new PickerView.Adapter<Item>() {
 
@@ -30,7 +30,7 @@ public class SimplePickerDialog extends TypeDialogFragment {
     private PickerView pickerView;
 
     public static SimplePickerDialog newInstance(int type, ActionListener actionListener) {
-        return TypeDialogFragment.newInstance(SimplePickerDialog.class, type, actionListener);
+        return BaseDialogFragment.newInstance(SimplePickerDialog.class, type, actionListener);
     }
 
     @Override
@@ -41,22 +41,7 @@ public class SimplePickerDialog extends TypeDialogFragment {
         pickerView = dialog.findViewById(R.id.pickerView);
         pickerView.setAdapter(adapter);
 
-        View cancel = dialog.findViewById(R.id.cancel);
-        cancel.setOnClickListener(v -> {
-            if (actionListener != null) {
-                actionListener.onCancelClick(this);
-            }
-            dismiss();
-        });
-
-        View done = dialog.findViewById(R.id.done);
-        done.setOnClickListener(v -> {
-            if (actionListener != null) {
-                actionListener.onDoneClick(this);
-            }
-            dismiss();
-        });
-
+        attachActions(dialog.findViewById(R.id.done), dialog.findViewById(R.id.cancel));
         return dialog;
     }
 
@@ -68,21 +53,7 @@ public class SimplePickerDialog extends TypeDialogFragment {
         pickerView = view.findViewById(R.id.pickerView);
         pickerView.setAdapter(adapter);
 
-        View cancel = view.findViewById(R.id.cancel);
-        cancel.setOnClickListener(v -> {
-            if (actionListener != null) {
-                actionListener.onCancelClick(this);
-            }
-            dismiss();
-        });
-
-        View done = view.findViewById(R.id.done);
-        done.setOnClickListener(v -> {
-            if (actionListener != null) {
-                actionListener.onDoneClick(this);
-            }
-            dismiss();
-        });
+        attachActions(view.findViewById(R.id.done), view.findViewById(R.id.cancel));
         return view;
     }
 
