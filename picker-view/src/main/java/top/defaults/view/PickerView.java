@@ -16,9 +16,11 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.Adapter;
 import android.widget.OverScroller;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import top.defaults.logger.Logger;
 
@@ -186,6 +188,34 @@ public class PickerView extends View {
 
         adapter.setPickerView(this);
         this.adapter = adapter;
+    }
+
+    public interface OnItemSelectedListener<T extends PickerItem> {
+        void onItemSelected(T item);
+    }
+
+    public <T extends PickerItem> void setItems(final List<T> items, final OnItemSelectedListener<T> listener) {
+        final Adapter<T> simpleAdapter = new Adapter<T>() {
+            @Override
+            public int getItemCount() {
+                return items.size();
+            }
+
+            @Override
+            public T getItem(int index) {
+                return items.get(index);
+            }
+        };
+        setAdapter(simpleAdapter);
+
+        setOnSelectedItemChangedListener(new OnSelectedItemChangedListener() {
+            @Override
+            public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
+                if (listener != null) {
+                    listener.onItemSelected(simpleAdapter.getItem(selectedItemPosition));
+                }
+            }
+        });
     }
 
     protected int getMaxCount() {
