@@ -38,7 +38,7 @@ public class PickerView extends View {
     private static final int DURATION_SHORT = 250;
     private static final int DURATION_LONG = 1000;
 
-    private Adapter adapter;
+    private Adapter<? extends PickerItem> adapter;
 
     private Paint textPaint;
     private Rect textBounds = new Rect();
@@ -178,7 +178,7 @@ public class PickerView extends View {
         return adapter;
     }
 
-    public void setAdapter(final Adapter adapter) {
+    public <T extends PickerItem> void setAdapter(final Adapter<T> adapter) {
         checkNotNull(adapter, "adapter == null");
         if (adapter.getItemCount() > Integer.MAX_VALUE / itemHeight) {
             throw new RuntimeException("getItemCount() is too large, max count can be PickerView.getMaxCount()");
@@ -288,6 +288,17 @@ public class PickerView extends View {
 
         notifySelectedItemChangedIfNeeded(selectedItemPosition);
         invalidate();
+    }
+
+    public <T extends PickerItem> T getSelectedItem(Class<T> cls) {
+        checkNotNull(adapter, "adapter must be set first");
+
+        PickerItem item = adapter.getItem(getSelectedItemPosition());
+        if (item == null || !cls.isInstance(item)) {
+            return null;
+        }
+
+        return cls.cast(item);
     }
 
     public interface OnSelectedItemChangedListener {

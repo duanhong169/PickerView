@@ -8,42 +8,12 @@
     android:orientation="vertical"
     tools:context="top.defaults.pickerviewapp.MainActivity">
 
-    <LinearLayout
+    <top.defaults.view.DivisionPickerView
+        android:id="@+id/divisionPicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <top.defaults.view.PickerView
-            android:id="@+id/provincePicker"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:preferredMaxOffsetItemCount="4"
-            app:textSize="18sp"
-            app:textColor="@color/colorAccent"
-            android:background="#e7e7e7"/>
-
-        <top.defaults.view.PickerView
-            android:id="@+id/cityPicker"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:preferredMaxOffsetItemCount="4"
-            app:textSize="18sp"
-            app:textColor="@color/colorPrimary"
-            android:background="#e7e7e7"/>
-
-        <top.defaults.view.PickerView
-            android:id="@+id/divisionPicker"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:preferredMaxOffsetItemCount="4"
-            app:textSize="18sp"
-            app:textColor="@color/colorPrimaryDark"
-            android:background="#e7e7e7"/>
-
-    </LinearLayout>
+        app:preferredMaxOffsetItemCount="4"
+        android:background="#e7e7e7"/>
 
     <TextView
         android:id="@+id/textView"

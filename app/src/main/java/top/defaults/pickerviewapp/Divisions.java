@@ -12,50 +12,23 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import top.defaults.view.PickerView;
+import top.defaults.view.Division;
 
 public class Divisions {
 
     private static List<Division> divisions;
 
-    public static class Division implements PickerView.PickerItem {
-        private int id;
-        private String name;
-        private int lvl;
-        private int parentId;
-
-        private Division parent;
-        private List<Division> children;
-
-        private static Division parse(JSONObject o) {
-            Division division = new Division();
-            try {
-                division.id = o.getInt("id");
-                division.name = o.getString("name");
-                division.lvl = o.getInt("lvl");
-                division.parentId = o.getInt("parent");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return division;
+    private static Division parse(JSONObject o) {
+        Division division = new Division();
+        try {
+            division.id = o.getInt("id");
+            division.name = o.getString("name");
+            division.lvl = o.getInt("lvl");
+            division.parentId = o.getInt("parent");
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
-        public String getName() {
-            return name;
-        }
-
-        public List<Division> getChildren() {
-            return children;
-        }
-
-        public Division getParent() {
-            return parent;
-        }
-
-        @Override
-        public String getText() {
-            return name;
-        }
+        return division;
     }
 
     public static List<Division> get(Context context) {
@@ -69,7 +42,7 @@ public class Divisions {
         try {
             JSONArray array = new JSONArray(readJson(context));
             for (int i = 0; i < array.length(); i++) {
-                Division division = Division.parse(array.getJSONObject(i));
+                Division division = Divisions.parse(array.getJSONObject(i));
                 if (division.lvl == 1) divisions.add(division);
                 divisionMap.put(division.id, division);
             }

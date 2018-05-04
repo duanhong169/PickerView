@@ -5,22 +5,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import top.defaults.view.PickerView;
+import top.defaults.view.Division;
+import top.defaults.view.DivisionPickerView;
 
 public class DivisionPickerActivity extends AppCompatActivity {
 
-    @BindView(R.id.provincePicker) PickerView provincePicker;
-    @BindView(R.id.cityPicker) PickerView cityPicker;
-    @BindView(R.id.divisionPicker) PickerView divisionPicker;
-
-    private final DivisionAdapter provisionAdapter = new DivisionAdapter();
-    private final DivisionAdapter cityAdapter = new DivisionAdapter();
-    private final DivisionAdapter divisionAdapter = new DivisionAdapter();
-
+    @BindView(R.id.divisionPicker) DivisionPickerView divisionPicker;
     @BindView(R.id.textView) TextView textView;
 
     @Override
@@ -29,43 +22,8 @@ public class DivisionPickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_division_picker);
         ButterKnife.bind(this);
 
-        final List<Divisions.Division> divisions = Divisions.get(this);
-
-        provisionAdapter.setDivisions(divisions);
-        provincePicker.setAdapter(provisionAdapter);
-
-        cityAdapter.setDivisions(provisionAdapter.getItem(provincePicker.getSelectedItemPosition()).getChildren());
-        cityPicker.setAdapter(cityAdapter);
-
-        divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
-        divisionPicker.setAdapter(divisionAdapter);
-
-        textView.setText(getSelectedDivisionName());
-
-        PickerView.OnSelectedItemChangedListener listener = (pickerView, previousPosition, selectedItemPosition) -> {
-            switch (pickerView.getId()) {
-                case R.id.provincePicker:
-                    cityAdapter.setDivisions(provisionAdapter.getItem(provincePicker.getSelectedItemPosition()).getChildren());
-                    divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
-                    break;
-                case R.id.cityPicker:
-                    divisionAdapter.setDivisions(cityAdapter.getItem(cityPicker.getSelectedItemPosition()).getChildren());
-                    break;
-            }
-
-            textView.setText(getSelectedDivisionName());
-        };
-
-        provincePicker.setOnSelectedItemChangedListener(listener);
-        cityPicker.setOnSelectedItemChangedListener(listener);
-        divisionPicker.setOnSelectedItemChangedListener(listener);
-    }
-
-    private String getSelectedDivisionName() {
-        String province = provisionAdapter.getText(provincePicker.getSelectedItemPosition());
-        String city = cityAdapter.getText(cityPicker.getSelectedItemPosition());
-        String division = divisionAdapter.getText(divisionPicker.getSelectedItemPosition());
-
-        return String.format(Locale.US, "%s%s%s", province, city, division);
+        final List<Division> divisions = Divisions.get(this);
+        divisionPicker.setDivisions(divisions);
+        divisionPicker.setOnSelectedDateChangedListener(division -> textView.setText(division.getCanonicalName()));
     }
 }

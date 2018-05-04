@@ -12,6 +12,7 @@ import top.defaults.pickerviewapp.dialog.ActionListener;
 import top.defaults.pickerviewapp.dialog.DivisionPickerDialog;
 import top.defaults.pickerviewapp.dialog.SimplePickerDialog;
 import top.defaults.pickerviewapp.dialog.TypeDialogFragment;
+import top.defaults.view.Division;
 
 public class PickerDialogActivity extends AppCompatActivity {
 
@@ -27,7 +28,7 @@ public class PickerDialogActivity extends AppCompatActivity {
             if (dialog instanceof SimplePickerDialog) {
                 textView.setText(((SimplePickerDialog) dialog).getSelectedItem().getText());
             } else if (dialog instanceof DivisionPickerDialog) {
-                Divisions.Division division = ((DivisionPickerDialog) dialog).getSelectedDivision();
+                Division division = ((DivisionPickerDialog) dialog).getSelectedDivision();
                 StringBuilder text = new StringBuilder(division.getText());
                 while (division.getParent() != null) {
                     division = division.getParent();
