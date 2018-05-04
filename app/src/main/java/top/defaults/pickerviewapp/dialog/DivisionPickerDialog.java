@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
+import top.defaults.pickerviewapp.DivisionModel;
 import top.defaults.view.Division;
 import top.defaults.pickerviewapp.Divisions;
 import top.defaults.pickerviewapp.R;
@@ -79,7 +80,7 @@ public class DivisionPickerDialog extends TypeDialogFragment {
     }
 
     private void setupPickers() {
-        final List<Division> divisions = Divisions.get(getActivity());
+        final List<DivisionModel> divisions = Divisions.get(getActivity());
         divisionPicker.setDivisions(divisions);
     }
 }

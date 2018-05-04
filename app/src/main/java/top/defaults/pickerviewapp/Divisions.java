@@ -12,14 +12,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import top.defaults.view.Division;
-
 public class Divisions {
 
-    private static List<Division> divisions;
+    private static List<DivisionModel> divisions;
 
-    private static Division parse(JSONObject o) {
-        Division division = new Division();
+    private static DivisionModel parse(JSONObject o) {
+        DivisionModel division = new DivisionModel();
         try {
             division.id = o.getInt("id");
             division.name = o.getString("name");
@@ -31,24 +29,24 @@ public class Divisions {
         return division;
     }
 
-    public static List<Division> get(Context context) {
+    public static List<DivisionModel> get(Context context) {
         if (divisions != null) {
             return divisions;
         }
 
         divisions = new ArrayList<>(4000);
-        SparseArray<Division> divisionMap = new SparseArray<>(4000);
+        SparseArray<DivisionModel> divisionMap = new SparseArray<>(4000);
 
         try {
             JSONArray array = new JSONArray(readJson(context));
             for (int i = 0; i < array.length(); i++) {
-                Division division = Divisions.parse(array.getJSONObject(i));
+                DivisionModel division = Divisions.parse(array.getJSONObject(i));
                 if (division.lvl == 1) divisions.add(division);
                 divisionMap.put(division.id, division);
             }
 
             for (int i = 0; i < divisionMap.size(); i++) {
-                Division division = divisionMap.valueAt(i);
+                DivisionModel division = divisionMap.valueAt(i);
                 if (division.parentId != 0) {
                     division.parent = divisionMap.get(division.parentId);
                     if (division.parent.children == null) {

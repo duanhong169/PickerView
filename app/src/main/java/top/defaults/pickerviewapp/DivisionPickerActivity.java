@@ -22,8 +22,8 @@ public class DivisionPickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_division_picker);
         ButterKnife.bind(this);
 
-        final List<Division> divisions = Divisions.get(this);
+        final List<DivisionModel> divisions = Divisions.get(this);
         divisionPicker.setDivisions(divisions);
-        divisionPicker.setOnSelectedDateChangedListener(division -> textView.setText(division.getCanonicalName()));
+        divisionPicker.setOnSelectedDateChangedListener(division -> textView.setText(Division.Helper.getCanonicalName(division)));
     }
 }

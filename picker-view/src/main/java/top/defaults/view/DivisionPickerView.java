@@ -44,7 +44,12 @@ public class DivisionPickerView extends PickerViewGroup {
         this.onSelectedDivisionChangedListener = onSelectedDivisionChangedListener;
     }
 
-    public void setDivisions(List<Division> divisions) {
+    /**
+     * 设置省市区数据，省市区数据通过父子关系构成树形结构，此处需传入第一级（省）列表
+     *
+     * @param divisions 省数据列表，市和区数据为省数据的子节点，需要外部构造好之后传入
+     */
+    public void setDivisions(List<? extends Division> divisions) {
         provisionAdapter.setDivisions(divisions);
         provincePicker.setAdapter(provisionAdapter);
 

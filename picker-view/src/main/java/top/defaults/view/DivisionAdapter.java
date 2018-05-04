@@ -4,9 +4,9 @@ import java.util.List;
 
 public class DivisionAdapter extends PickerView.Adapter<Division> {
 
-    private List<Division> divisions;
+    private List<? extends Division> divisions;
 
-    public void setDivisions(List<Division> divisions) {
+    public void setDivisions(List<? extends Division> divisions) {
         this.divisions = divisions;
         notifyDataSetChanged();
     }
