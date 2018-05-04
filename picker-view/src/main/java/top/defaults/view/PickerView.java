@@ -123,7 +123,7 @@ public class PickerView extends View {
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         if (isInEditMode()) {
-            adapter = new Adapter() {
+            adapter = new Adapter<PickerItem>() {
                 @Override
                 public int getItemCount() {
                     return getMaxCount();
@@ -199,7 +199,7 @@ public class PickerView extends View {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public abstract static class Adapter {
+    public abstract static class Adapter<T extends PickerItem> {
         private WeakReference<PickerView> pickerViewRef;
 
         private void setPickerView(PickerView pickerView) {
@@ -223,7 +223,7 @@ public class PickerView extends View {
         }
 
         public abstract int getItemCount();
-        public abstract PickerItem getItem(int index);
+        public abstract T getItem(int index);
 
         public String getText(int index) {
             if (getItem(index) == null) return "null";
