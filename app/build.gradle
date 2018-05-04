@@ -33,6 +33,6 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.7.0'
     implementation 'com.github.duanhong169:logger:1.0.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
-//    implementation 'com.github.duanhong169:picker-view:0.2.4'
-    implementation project(':picker-view')
+    implementation 'com.github.duanhong169:picker-view:0.3.0'
+//    implementation project(':picker-view')
 }
