@@ -145,7 +145,7 @@ public class DateTimePickerView extends PickerViewGroup {
         runIfNotNull(new Runnable() {
             @Override
             public void run() {
-                yearPickerView.setAdapter(new PickerView.Adapter() {
+                yearPickerView.setAdapter(new PickerView.Adapter<CalendarField>() {
 
                     @Override
                     public int getItemCount() {
@@ -158,7 +158,7 @@ public class DateTimePickerView extends PickerViewGroup {
                     }
                 });
 
-                monthPickerView.setAdapter(new PickerView.Adapter() {
+                monthPickerView.setAdapter(new PickerView.Adapter<CalendarField>() {
 
                     private int monthOffset() {
                         if (!isAtStartYear()) return 0;
@@ -176,7 +176,7 @@ public class DateTimePickerView extends PickerViewGroup {
                     }
                 });
 
-                dayPickerView.setAdapter(new PickerView.Adapter() {
+                dayPickerView.setAdapter(new PickerView.Adapter<CalendarField>() {
 
                     private int dayOffset() {
                         if (!isAtStartYearAndMonth()) return 0;
@@ -197,7 +197,7 @@ public class DateTimePickerView extends PickerViewGroup {
         }, yearPickerView, monthPickerView, dayPickerView);
 
         if (datePickerView != null) {
-            datePickerView.setAdapter(new PickerView.Adapter() {
+            datePickerView.setAdapter(new PickerView.Adapter<PickerView.PickerItem>() {
                 @Override
                 public int getItemCount() {
                     return datePickerView.getMaxCount();
@@ -221,7 +221,7 @@ public class DateTimePickerView extends PickerViewGroup {
         }
 
         if (timePickerView != null) {
-            timePickerView.setAdapter(new PickerView.Adapter() {
+            timePickerView.setAdapter(new PickerView.Adapter<TimeItem>() {
 
                 private int stepOffset = calculateStepOffset();
 
@@ -238,7 +238,7 @@ public class DateTimePickerView extends PickerViewGroup {
                 }
 
                 @Override
-                public PickerView.PickerItem getItem(int index) {
+                public TimeItem getItem(int index) {
                     return new TimeItem(DateTimePickerView.this, index + stepOffset);
                 }
             });
@@ -247,7 +247,7 @@ public class DateTimePickerView extends PickerViewGroup {
         runIfNotNull(new Runnable() {
             @Override
             public void run() {
-                hourPickerView.setAdapter(new PickerView.Adapter() {
+                hourPickerView.setAdapter(new PickerView.Adapter<CalendarField>() {
 
                     private int hourOffset() {
                         if (!isAtStartDate()) return 0;
@@ -260,12 +260,12 @@ public class DateTimePickerView extends PickerViewGroup {
                     }
 
                     @Override
-                    public PickerView.PickerItem getItem(int index) {
+                    public CalendarField getItem(int index) {
                         return new CalendarField(Calendar.HOUR_OF_DAY, index + hourOffset());
                     }
                 });
 
-                minutePickerView.setAdapter(new PickerView.Adapter() {
+                minutePickerView.setAdapter(new PickerView.Adapter<CalendarField>() {
 
                     private int stepOffset() {
                         if (!isAtStartDateAndHour()) return 0;
@@ -279,7 +279,7 @@ public class DateTimePickerView extends PickerViewGroup {
                     }
 
                     @Override
-                    public PickerView.PickerItem getItem(int index) {
+                    public CalendarField getItem(int index) {
                         return new CalendarField(Calendar.MINUTE, (index + stepOffset()) * minutesInterval);
                     }
                 });
