@@ -635,13 +635,25 @@ public class PickerView extends View {
             int scrollOffset = -yOffset;
             if (selectedItemPosition != 0 && selectedItemPosition != adapter.getItemCount() - 1) {
                 if (yOffset > 0) {
-                    if (yOffset > itemHeight / 2) {
+                    if (yOffset > itemHeight / 3) {
                         scrollOffset = itemHeight - yOffset;
                     }
                 } else {
-                    if (Math.abs(yOffset) > itemHeight / 2) {
+                    if (Math.abs(yOffset) > itemHeight / 3) {
                         scrollOffset = -(itemHeight + yOffset);
                     }
+                }
+            }
+
+            if (selectedItemPosition == 0 && yOffset < 0) {
+                if (Math.abs(yOffset) > itemHeight / 3) {
+                    scrollOffset = -(itemHeight + yOffset);
+                }
+            }
+
+            if (selectedItemPosition == adapter.getItemCount() - 1 && yOffset > 0) {
+                if (yOffset > itemHeight / 3) {
+                    scrollOffset = itemHeight - yOffset;
                 }
             }
 
