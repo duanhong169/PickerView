@@ -1,4 +1,4 @@
-# PickerView [![gitHub release](https://img.shields.io/github/release/duanhong169/PickerView.svg?style=social)](https://github.com/duanhong169/PickerView/releases) [![platform](https://img.shields.io/badge/platform-android-brightgreen.svg)](https://developer.android.com/index.html) [![license](https://img.shields.io/badge/license-Apache%202-green.svg)](https://github.com/duanhong169/PickerView/blob/master/LICENSE)
+# PickerView [![gitHub release](https://img.shields.io/github/release/duanhong169/PickerView.svg?style=social)](https://github.com/duanhong169/PickerView/releases) [![platform](https://img.shields.io/badge/platform-android-brightgreen.svg)](https://developer.android.com/index.html) [![license](https://img.shields.io/badge/license-Apache%202-green.svg)](https://github.com/duanhong169/PickerView/blob/master/LICENSE) [![Build status](https://build.appcenter.ms/v0.1/apps/82a51128-aa71-4c56-9114-4170c51cb899/branches/master/badge)](https://appcenter.ms)
 
 Android滚动选择器
 

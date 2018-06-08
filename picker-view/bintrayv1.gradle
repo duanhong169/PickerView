@@ -29,11 +29,14 @@ artifacts {
     archives sourcesJar
 }
 
-// Bintray
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
 bintray {
+    // Bintray
+    Properties properties = new Properties()
+    File localPropertiesFile = project.rootProject.file('local.properties')
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.newDataInputStream())
+    }
+
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
 
