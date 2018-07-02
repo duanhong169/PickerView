@@ -150,5 +150,6 @@ dateTimePickerView.setOnSelectedDateChangedListener(new DateTimePickerView.OnSel
 
 更详细的使用方法请参见示例。
 
-### License
+## License
+
 请查看[LICENSE](./LICENSE)文件。
