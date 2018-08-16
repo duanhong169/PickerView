@@ -5,21 +5,16 @@ ext {
     bintrayName = 'picker-view'
 
     publishedGroupId = 'com.github.duanhong169'
-    libraryName = 'PickerView'
     artifact = 'picker-view'
 
+    libraryName = 'PickerView'
     libraryDescription = 'A view for picking data on Android'
+    libraryVersion = '1.0.0'
 
-    siteUrl = 'https://github.com/duanhong169/PickerView'
     gitUrl = 'https://github.com/duanhong169/PickerView.git'
+    siteUrl = 'https://github.com/duanhong169/PickerView'
 
-    libraryVersion = '0.3.1'
-
-    developerId = 'duanhong169'
-    developerName = 'Hong Duan'
-    developerEmail = 'duanhong169@gmail.com'
-
-    licenseName = 'The MIT License, Version 2.0'
+    licenseName = 'Apache License 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
 }
@@ -51,5 +46,4 @@ dependencies {
     implementation 'com.github.duanhong169:logger:1.0.0'
 }
 
-apply from: 'installv1.gradle'
-apply from: 'bintrayv1.gradle'
+apply from: 'https://raw.githubusercontent.com/duanhong169/bintray-gradle/master/bintray.gradle'
