@@ -227,6 +227,12 @@ public class PickerView extends View {
         }
     }
 
+    private void updateSelectedItem() {
+        float centerPosition = centerPosition();
+        int newSelectedItemPosition = (int) Math.floor(centerPosition);
+        notifySelectedItemChangedIfNeeded(newSelectedItemPosition, true);
+    }
+
     @SuppressWarnings("WeakerAccess")
     public abstract static class Adapter<T extends PickerItem> {
         private WeakReference<PickerView> pickerViewRef;
@@ -239,7 +245,6 @@ public class PickerView extends View {
             if (pickerViewRef != null) {
                 PickerView pickerView = pickerViewRef.get();
                 if (pickerView != null) {
-                    pickerView.notifySelectedItemChangedIfNeeded(pickerView.selectedItemPosition, true);
                     pickerView.updateSelectedItem();
                     pickerView.computeScrollParams();
                     if (!pickerView.scroller.isFinished()) {
@@ -253,6 +258,9 @@ public class PickerView extends View {
 
         public abstract int getItemCount();
         public abstract T getItem(int index);
+        public T getLastItem() {
+            return getItem(getItemCount() - 1);
+        }
 
         public String getText(int index) {
             if (getItem(index) == null) return "null";
@@ -345,7 +353,7 @@ public class PickerView extends View {
     }
 
     private void notifySelectedItemChangedIfNeeded(int newSelectedItemPosition, boolean forceNotify) {
-        int clampedOldSelectedItemPosition = clampItemPosition(selectedItemPosition);
+        int oldSelectedItemPosition = selectedItemPosition;
         int clampedNewSelectedItemPosition = clampItemPosition(newSelectedItemPosition);
 
         boolean changed = forceNotify;
@@ -362,7 +370,7 @@ public class PickerView extends View {
         }
 
         if (changed && onSelectedItemChangedListener != null) {
-            onSelectedItemChangedListener.onSelectedItemChanged(this, clampedOldSelectedItemPosition, clampedNewSelectedItemPosition);
+            onSelectedItemChangedListener.onSelectedItemChanged(this, oldSelectedItemPosition, clampedNewSelectedItemPosition);
         }
     }
 
@@ -599,12 +607,6 @@ public class PickerView extends View {
         maxOverScrollY = 2 * itemHeight;
     }
 
-    private void updateSelectedItem() {
-        float centerPosition = centerPosition();
-        int newSelectedItemPosition = (int) Math.floor(centerPosition);
-        notifySelectedItemChangedIfNeeded(newSelectedItemPosition);
-    }
-
     private boolean isPositionInvalid(int itemPosition) {
         return itemPosition < 0 || itemPosition >= adapter.getItemCount();
     }
@@ -645,15 +647,18 @@ public class PickerView extends View {
                 }
             }
 
-            if (selectedItemPosition == 0 && yOffset < 0) {
-                if (Math.abs(yOffset) > itemHeight / 3) {
-                    scrollOffset = -(itemHeight + yOffset);
+            // 如果item数量为1，总是回到0偏移
+            if (adapter.getItemCount() > 1) {
+                if (selectedItemPosition == 0 && yOffset < 0) {
+                    if (Math.abs(yOffset) > itemHeight / 3) {
+                        scrollOffset = -(itemHeight + yOffset);
+                    }
                 }
-            }
 
-            if (selectedItemPosition == adapter.getItemCount() - 1 && yOffset > 0) {
-                if (yOffset > itemHeight / 3) {
-                    scrollOffset = itemHeight - yOffset;
+                if (selectedItemPosition == adapter.getItemCount() - 1 && yOffset > 0) {
+                    if (yOffset > itemHeight / 3) {
+                        scrollOffset = itemHeight - yOffset;
+                    }
                 }
             }
 

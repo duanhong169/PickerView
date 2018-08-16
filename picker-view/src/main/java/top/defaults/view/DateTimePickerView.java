@@ -21,6 +21,7 @@ public class DateTimePickerView extends PickerViewGroup {
     protected int type = TYPE_YEAR_MONTH_DAY;
 
     private Calendar startDate;
+    private Calendar endDate;
     private Calendar selectedDate;
 
     private PickerView yearPickerView;
@@ -40,6 +41,59 @@ public class DateTimePickerView extends PickerViewGroup {
 
     private int minutesInterval = FIVE;
 
+    private static final int PRESERVE_FLAG_MONTH = 1;
+    private static final int PRESERVE_FLAG_DAY = 1 << 1;
+    private static final int PRESERVE_FLAG_HOUR = 1 << 2;
+    private static final int PRESERVE_FLAG_MINUTE = 1 << 3;
+    private static final int PRESERVE_FLAG_TIME = 1 << 4;
+    private int tryPreserveValuesFlag = 0;
+
+    private boolean shouldTryPreserve(int field) {
+        switch (field) {
+            case FIELD_MONTH:
+                return (tryPreserveValuesFlag & PRESERVE_FLAG_MONTH) != 0;
+            case FIELD_DAY:
+                return (tryPreserveValuesFlag & PRESERVE_FLAG_DAY) != 0;
+            case FIELD_HOUR:
+                return (tryPreserveValuesFlag & PRESERVE_FLAG_HOUR) != 0;
+            case FIELD_MINUTE:
+                return (tryPreserveValuesFlag & PRESERVE_FLAG_MINUTE) != 0;
+            case FIELD_TIME:
+                return (tryPreserveValuesFlag & PRESERVE_FLAG_TIME) != 0;
+        }
+        return false;
+    }
+
+    private void addFlags(int field) {
+        switch (field) {
+            case FIELD_YEAR:
+                tryPreserveValuesFlag |= PRESERVE_FLAG_MONTH;
+                break;
+            case FIELD_MONTH:
+                tryPreserveValuesFlag |= PRESERVE_FLAG_DAY;
+                break;
+            case FIELD_DAY:
+                if (type == TYPE_YEAR_MONTH_DAY_HOUR_MINUTE) {
+                    tryPreserveValuesFlag |= PRESERVE_FLAG_HOUR;
+                }
+                break;
+            case FIELD_DATE:
+                if (type == TYPE_DATE_HOUR_MINUTE) {
+                    tryPreserveValuesFlag |= PRESERVE_FLAG_HOUR;
+                } else if (type == TYPE_DATE_TIME) {
+                    tryPreserveValuesFlag |= PRESERVE_FLAG_TIME;
+                }
+                break;
+            case FIELD_HOUR:
+                tryPreserveValuesFlag |= PRESERVE_FLAG_MINUTE;
+                break;
+        }
+    }
+
+    private void clearFlags() {
+        tryPreserveValuesFlag = 0;
+    }
+
     public interface OnSelectedDateChangedListener {
         void onSelectedDateChanged(Calendar date);
     }
@@ -54,6 +108,7 @@ public class DateTimePickerView extends PickerViewGroup {
         if (onSelectedDateChangedListener != null) {
             onSelectedDateChangedListener.onSelectedDateChanged(selectedDate);
         }
+        clearFlags();
     }
 
     public DateTimePickerView(Context context) {
@@ -149,12 +204,15 @@ public class DateTimePickerView extends PickerViewGroup {
 
                     @Override
                     public int getItemCount() {
+                        if (endDate != null && TimeUtils.compare(startDate, endDate) <= 0) {
+                            return endDate.get(Calendar.YEAR) - startDate.get(Calendar.YEAR) + 1;
+                        }
                         return yearPickerView.getMaxCount();
                     }
 
                     @Override
                     public CalendarField getItem(int index) {
-                        return new CalendarField(Calendar.YEAR, startDate.get(Calendar.YEAR) + index);
+                        return new CalendarField(FIELD_YEAR, startDate.get(Calendar.YEAR) + index);
                     }
                 });
 
@@ -167,12 +225,15 @@ public class DateTimePickerView extends PickerViewGroup {
 
                     @Override
                     public int getItemCount() {
+                        if (isAtEndYear()) {
+                            return endDate.get(Calendar.MONTH) - monthOffset() + 1;
+                        }
                         return 12 - monthOffset();
                     }
 
                     @Override
                     public CalendarField getItem(int index) {
-                        return new CalendarField(Calendar.MONTH, index + monthOffset());
+                        return new CalendarField(FIELD_MONTH, index + monthOffset());
                     }
                 });
 
@@ -185,12 +246,15 @@ public class DateTimePickerView extends PickerViewGroup {
 
                     @Override
                     public int getItemCount() {
+                        if (isAtEndYearAndMonth()) {
+                            return endDate.get(Calendar.DAY_OF_MONTH) - dayOffset();
+                        }
                         return selectedDate.getActualMaximum(Calendar.DAY_OF_MONTH) - dayOffset();
                     }
 
                     @Override
                     public CalendarField getItem(int index) {
-                        return new CalendarField(Calendar.DAY_OF_MONTH, index + dayOffset() + 1);
+                        return new CalendarField(FIELD_DAY, index + dayOffset() + 1);
                     }
                 });
             }
@@ -200,6 +264,9 @@ public class DateTimePickerView extends PickerViewGroup {
             datePickerView.setAdapter(new PickerView.Adapter<PickerView.PickerItem>() {
                 @Override
                 public int getItemCount() {
+                    if (endDate != null) {
+                        return TimeUtils.daySwitchesBetween(startDate, endDate) + 1;
+                    }
                     return datePickerView.getMaxCount();
                 }
 
@@ -223,16 +290,19 @@ public class DateTimePickerView extends PickerViewGroup {
         if (timePickerView != null) {
             timePickerView.setAdapter(new PickerView.Adapter<TimeItem>() {
 
-                private int stepOffset = calculateStepOffset();
+                private int stepOffset = calculateStepOffsetForTimePicker();
 
                 @Override
                 public void notifyDataSetChanged() {
-                    stepOffset = calculateStepOffset();
+                    stepOffset = calculateStepOffsetForTimePicker();
                     super.notifyDataSetChanged();
                 }
 
                 @Override
                 public int getItemCount() {
+                    if (isAtEndDate()) {
+                        return TimeUtils.calculateStep(startDate, endDate, minutesInterval) - stepOffset + 1;
+                    }
                     int maxCount = 24 * (60 / minutesInterval);
                     return maxCount - stepOffset;
                 }
@@ -256,12 +326,15 @@ public class DateTimePickerView extends PickerViewGroup {
 
                     @Override
                     public int getItemCount() {
+                        if (isAtEndDate()) {
+                            return endDate.get(Calendar.HOUR_OF_DAY) - hourOffset() + 1;
+                        }
                         return 24 - hourOffset();
                     }
 
                     @Override
                     public CalendarField getItem(int index) {
-                        return new CalendarField(Calendar.HOUR_OF_DAY, index + hourOffset());
+                        return new CalendarField(FIELD_HOUR, index + hourOffset());
                     }
                 });
 
@@ -275,12 +348,15 @@ public class DateTimePickerView extends PickerViewGroup {
 
                     @Override
                     public int getItemCount() {
+                        if (isAtEndDateAndHour()) {
+                            return endDate.get(Calendar.MINUTE) / minutesInterval - stepOffset() + 1;
+                        }
                         return 60 / minutesInterval - stepOffset();
                     }
 
                     @Override
                     public CalendarField getItem(int index) {
-                        return new CalendarField(Calendar.MINUTE, (index + stepOffset()) * minutesInterval);
+                        return new CalendarField(FIELD_MINUTE, (index + stepOffset()) * minutesInterval);
                     }
                 });
             }
@@ -289,10 +365,18 @@ public class DateTimePickerView extends PickerViewGroup {
         reloadData();
     }
 
+    private static final int FIELD_YEAR = 0;
+    private static final int FIELD_MONTH = 1;
+    private static final int FIELD_DAY = 2;
+    private static final int FIELD_HOUR = 3;
+    private static final int FIELD_MINUTE = 4;
+    private static final int FIELD_DATE = 5;
+    private static final int FIELD_TIME = 6;
+
     private static class CalendarField implements PickerView.PickerItem {
 
         private int field;
-        private int value;
+        protected int value;
 
         CalendarField(int field, int value) {
             this.field = field;
@@ -303,19 +387,19 @@ public class DateTimePickerView extends PickerViewGroup {
         public String getText() {
             String text = "";
             switch (field) {
-                case Calendar.YEAR:
+                case FIELD_YEAR:
                     text = String.format(Locale.getDefault(), "%d年", value);
                     break;
-                case Calendar.MONTH:
+                case FIELD_MONTH:
                     text = String.format(Locale.getDefault(), "%02d月", value + 1);
                     break;
-                case Calendar.DAY_OF_MONTH:
+                case FIELD_DAY:
                     text = String.format(Locale.getDefault(), "%02d日", value);
                     break;
-                case Calendar.HOUR_OF_DAY:
+                case FIELD_HOUR:
                     text = String.format(Locale.getDefault(), "%02d点", value);
                     break;
-                case Calendar.MINUTE:
+                case FIELD_MINUTE:
                     text = String.format(Locale.getDefault(), "%02d分", value);
                     break;
             }
@@ -323,14 +407,13 @@ public class DateTimePickerView extends PickerViewGroup {
         }
     }
 
-    private static class TimeItem implements PickerView.PickerItem {
+    private static class TimeItem extends CalendarField {
 
         private WeakReference<DateTimePickerView> hostRef;
-        private int stepCount;
 
         TimeItem(DateTimePickerView host, int stepCount) {
+            super(FIELD_TIME, stepCount);
             hostRef = new WeakReference<>(host);
-            this.stepCount = stepCount;
         }
 
         @Override
@@ -340,7 +423,7 @@ public class DateTimePickerView extends PickerViewGroup {
             final Calendar tempCalendar = (Calendar) hostRef.get().selectedDate.clone();
             tempCalendar.set(Calendar.HOUR_OF_DAY, 0);
             tempCalendar.set(Calendar.MINUTE, 0);
-            tempCalendar.add(Calendar.MINUTE, hostRef.get().minutesInterval * stepCount);
+            tempCalendar.add(Calendar.MINUTE, hostRef.get().minutesInterval * value);
             return TimeUtils.time(tempCalendar);
         }
     }
@@ -371,13 +454,22 @@ public class DateTimePickerView extends PickerViewGroup {
     public void setStartDate(Calendar date) {
         checkNotNull(date, "startDate == null");
         startDate = date;
-        int minute = startDate.get(Calendar.MINUTE);
-        int remain = minute % minutesInterval;
-        if (remain != 0) {
-            startDate.set(Calendar.MINUTE, minute + minutesInterval - remain);
-        }
+        adjustMinutesToInterval(startDate);
         if (selectedDate == null || TimeUtils.compare(startDate, selectedDate) > 0) {
             selectedDate = (Calendar) startDate.clone();
+        }
+        reloadData();
+    }
+
+    public void setEndDate(Calendar date) {
+        checkNotNull(date, "endDate == null");
+        endDate = date;
+        if (TimeUtils.compare(startDate, endDate) > 0) {
+            endDate = (Calendar) startDate.clone();
+        }
+        adjustMinutesToIntervalFloor(endDate);
+        if (TimeUtils.compare(endDate, selectedDate) < 0) {
+            selectedDate = (Calendar) endDate.clone();
         }
         reloadData();
     }
@@ -389,15 +481,27 @@ public class DateTimePickerView extends PickerViewGroup {
     public void setSelectedDate(Calendar date) {
         checkNotNull(date, "selectedDate == null");
         selectedDate = date;
-        int minute = selectedDate.get(Calendar.MINUTE);
-        int remain = minute % minutesInterval;
-        if (remain != 0) {
-            selectedDate.set(Calendar.MINUTE, minute + minutesInterval - remain);
-        }
-        if (startDate == null || TimeUtils.compare(startDate, selectedDate) > 0) {
+        adjustMinutesToInterval(selectedDate);
+        if (TimeUtils.compare(startDate, selectedDate) > 0) {
             startDate = (Calendar) selectedDate.clone();
         }
         reloadData();
+    }
+
+    private void adjustMinutesToInterval(Calendar date) {
+        adjustMinutesToInterval(date, false);
+    }
+
+    private void adjustMinutesToIntervalFloor(Calendar date) {
+        adjustMinutesToInterval(date, true);
+    }
+
+    private void adjustMinutesToInterval(Calendar date, boolean floor) {
+        int minute = date.get(Calendar.MINUTE);
+        int remain = minute % minutesInterval;
+        if (remain != 0) {
+            date.set(Calendar.MINUTE, minute - remain + (floor ? 0 : minutesInterval));
+        }
     }
 
     public PickerView getYearPickerView() {
@@ -426,6 +530,23 @@ public class DateTimePickerView extends PickerViewGroup {
 
     public PickerView getTimePickerView() {
         return timePickerView;
+    }
+
+    private int getDesiredPosition(PickerView pickerView, int oldValue) {
+        int desiredPosition;
+        CalendarField firstItem = (CalendarField) pickerView.getAdapter().getItem(0);
+        CalendarField lastItem = (CalendarField) pickerView.getAdapter().getLastItem();
+        if (oldValue <= firstItem.value) {
+            desiredPosition = 0;
+        } else if (oldValue >= lastItem.value) {
+            desiredPosition = pickerView.getAdapter().getItemCount() - 1;
+        } else {
+            desiredPosition = oldValue - firstItem.value;
+            if (firstItem.field == FIELD_MINUTE) {
+                desiredPosition /= minutesInterval;
+            }
+        }
+        return desiredPosition;
     }
 
     private void updateSelection() {
@@ -461,28 +582,20 @@ public class DateTimePickerView extends PickerViewGroup {
                     public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
                         CalendarField field = (CalendarField)  pickerView.getAdapter().getItem(selectedItemPosition);
                         selectedDate.set(Calendar.YEAR, field.value);
+                        addFlags(FIELD_YEAR);
                         monthPickerView.notifyDataSetChanged();
                     }
                 });
                 monthPickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChangedListener() {
                     @Override
                     public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                        if (previousPosition == selectedItemPosition) {
-                            CalendarField firstItem = (CalendarField) pickerView.getAdapter().getItem(0);
-                            int desiredPosition;
-                            if (selectedDate.get(Calendar.MONTH) <= firstItem.value) {
-                                desiredPosition = 0;
-                            } else {
-                                desiredPosition = selectedDate.get(Calendar.MONTH) - firstItem.value;
-                            }
+                        int desiredPosition = selectedItemPosition;
+                        if (shouldTryPreserve(FIELD_MONTH)) {
+                            desiredPosition = getDesiredPosition(pickerView, selectedDate.get(Calendar.MONTH));
+                        }
 
-                            if (selectedItemPosition != desiredPosition) {
-                                monthPickerView.setSelectedItemPosition(desiredPosition);
-                            } else {
-                                CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
-                                selectedDate.set(Calendar.MONTH, field.value);
-                                dayPickerView.notifyDataSetChanged();
-                            }
+                        if (selectedItemPosition != desiredPosition) {
+                            monthPickerView.setSelectedItemPosition(desiredPosition);
                         } else {
                             CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
 
@@ -496,6 +609,7 @@ public class DateTimePickerView extends PickerViewGroup {
                             }
 
                             selectedDate.set(Calendar.MONTH, field.value);
+                            addFlags(FIELD_MONTH);
                             dayPickerView.notifyDataSetChanged();
                         }
                     }
@@ -503,30 +617,19 @@ public class DateTimePickerView extends PickerViewGroup {
                 dayPickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChangedListener() {
                     @Override
                     public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                        if (previousPosition == selectedItemPosition) {
-                            CalendarField firstItem = (CalendarField) pickerView.getAdapter().getItem(0);
-                            int desiredPosition;
-                            if (selectedDate.get(Calendar.DAY_OF_MONTH) <= firstItem.value) {
-                                desiredPosition = 0;
-                            } else {
-                                desiredPosition = selectedDate.get(Calendar.DAY_OF_MONTH) - firstItem.value;
-                            }
+                        int desiredPosition = selectedItemPosition;
+                        if (shouldTryPreserve(FIELD_DAY)) {
+                            desiredPosition = getDesiredPosition(pickerView, selectedDate.get(Calendar.DAY_OF_MONTH));
+                        }
 
-                            if (selectedItemPosition != desiredPosition) {
-                                dayPickerView.setSelectedItemPosition(desiredPosition);
-                            } else {
-                                CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
-                                update(field);
-                            }
+                        if (selectedItemPosition != desiredPosition) {
+                            dayPickerView.setSelectedItemPosition(desiredPosition);
                         } else {
                             CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
-                            update(field);
+                            selectedDate.set(Calendar.DAY_OF_MONTH, field.value);
+                            addFlags(FIELD_DAY);
+                            chainEvent();
                         }
-                    }
-
-                    private void update(CalendarField field) {
-                        selectedDate.set(Calendar.DAY_OF_MONTH, field.value);
-                        chainEvent();
                     }
                 });
             }
@@ -541,6 +644,7 @@ public class DateTimePickerView extends PickerViewGroup {
                 @Override
                 public void onSelectedItemChanged(PickerView pickerView, int previousPosition, final int selectedItemPosition) {
                     selectedDate.add(Calendar.DAY_OF_YEAR, selectedItemPosition - previousPosition);
+                    addFlags(FIELD_DATE);
                     chainEvent();
                 }
             });
@@ -554,26 +658,17 @@ public class DateTimePickerView extends PickerViewGroup {
             timePickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChangedListener() {
                 @Override
                 public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                    int previousStep = calculateStep();
-                    if (previousPosition == selectedItemPosition) {
-                        TimeItem firstItem = (TimeItem) pickerView.getAdapter().getItem(0);
-                        int desiredPosition;
-                        if (previousStep <= firstItem.stepCount) {
-                            desiredPosition = 0;
-                        } else {
-                            desiredPosition = previousStep - firstItem.stepCount;
-                        }
+                    int desiredPosition = selectedItemPosition;
+                    int previousStep = calculateStepForTimePicker();
+                    if (shouldTryPreserve(FIELD_TIME)) {
+                        desiredPosition = getDesiredPosition(pickerView, previousStep);
+                    }
 
-                        if (selectedItemPosition != desiredPosition) {
-                            timePickerView.setSelectedItemPosition(desiredPosition);
-                        } else {
-                            TimeItem currentItem = (TimeItem) pickerView.getAdapter().getItem(selectedItemPosition);
-                            selectedDate.add(Calendar.MINUTE, (currentItem.stepCount - previousStep) * minutesInterval);
-                            notifySelectedDateChanged();
-                        }
+                    if (selectedItemPosition != desiredPosition) {
+                        timePickerView.setSelectedItemPosition(desiredPosition);
                     } else {
                         TimeItem currentItem = (TimeItem) pickerView.getAdapter().getItem(selectedItemPosition);
-                        selectedDate.add(Calendar.MINUTE, (currentItem.stepCount - previousStep) * minutesInterval);
+                        selectedDate.add(Calendar.MINUTE, (currentItem.value - previousStep) * minutesInterval);
                         notifySelectedDateChanged();
                     }
                 }
@@ -607,25 +702,17 @@ public class DateTimePickerView extends PickerViewGroup {
                 hourPickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChangedListener() {
                     @Override
                     public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                        if (previousPosition == selectedItemPosition) {
-                            CalendarField firstItem = (CalendarField) pickerView.getAdapter().getItem(0);
-                            int desiredPosition;
-                            if (selectedDate.get(Calendar.HOUR_OF_DAY) <= firstItem.value) {
-                                desiredPosition = 0;
-                            } else {
-                                desiredPosition = selectedDate.get(Calendar.HOUR_OF_DAY) - firstItem.value;
-                            }
+                        int desiredPosition = selectedItemPosition;
+                        if (shouldTryPreserve(FIELD_HOUR)) {
+                            desiredPosition = getDesiredPosition(pickerView, selectedDate.get(Calendar.HOUR_OF_DAY));
+                        }
 
-                            if (selectedItemPosition != desiredPosition) {
-                                hourPickerView.setSelectedItemPosition(desiredPosition);
-                            } else {
-                                CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
-                                selectedDate.set(Calendar.HOUR_OF_DAY, field.value);
-                                minutePickerView.notifyDataSetChanged();
-                            }
+                        if (selectedItemPosition != desiredPosition) {
+                            hourPickerView.setSelectedItemPosition(desiredPosition);
                         } else {
                             CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
                             selectedDate.set(Calendar.HOUR_OF_DAY, field.value);
+                            addFlags(FIELD_HOUR);
                             minutePickerView.notifyDataSetChanged();
                         }
                     }
@@ -634,22 +721,13 @@ public class DateTimePickerView extends PickerViewGroup {
                 minutePickerView.setOnSelectedItemChangedListener(new PickerView.OnSelectedItemChangedListener() {
                     @Override
                     public void onSelectedItemChanged(PickerView pickerView, int previousPosition, int selectedItemPosition) {
-                        if (previousPosition == selectedItemPosition) {
-                            CalendarField firstItem = (CalendarField) pickerView.getAdapter().getItem(0);
-                            int desiredPosition;
-                            if (selectedDate.get(Calendar.MINUTE) <= firstItem.value) {
-                                desiredPosition = 0;
-                            } else {
-                                desiredPosition = (selectedDate.get(Calendar.MINUTE) - firstItem.value) / minutesInterval;
-                            }
+                        int desiredPosition = selectedItemPosition;
+                        if (shouldTryPreserve(FIELD_MINUTE)) {
+                            desiredPosition = getDesiredPosition(pickerView, selectedDate.get(Calendar.MINUTE));
+                        }
 
-                            if (selectedItemPosition != desiredPosition) {
-                                minutePickerView.setSelectedItemPosition(desiredPosition);
-                            } else {
-                                CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
-                                selectedDate.set(Calendar.MINUTE, field.value);
-                                notifySelectedDateChanged();
-                            }
+                        if (selectedItemPosition != desiredPosition) {
+                            minutePickerView.setSelectedItemPosition(desiredPosition);
                         } else {
                             CalendarField field = (CalendarField) pickerView.getAdapter().getItem(selectedItemPosition);
                             selectedDate.set(Calendar.MINUTE, field.value);
@@ -669,13 +747,14 @@ public class DateTimePickerView extends PickerViewGroup {
         if (datePickerView != null) {
             datePickerView.notifyDataSetChanged();
         }
+        clearFlags();
     }
 
-    private int calculateStepOffset() {
+    private int calculateStepOffsetForTimePicker() {
         return TimeUtils.calculateStepOffset(startDate, selectedDate, minutesInterval);
     }
 
-    private int calculateStep() {
+    private int calculateStepForTimePicker() {
         return TimeUtils.calculateStep(selectedDate, minutesInterval);
     }
 
@@ -715,6 +794,30 @@ public class DateTimePickerView extends PickerViewGroup {
         return selectedDate.get(Calendar.YEAR) == startDate.get(Calendar.YEAR)
                 && selectedDate.get(Calendar.DAY_OF_YEAR) == startDate.get(Calendar.DAY_OF_YEAR)
                 && selectedDate.get(Calendar.HOUR_OF_DAY) == startDate.get(Calendar.HOUR_OF_DAY);
+    }
+
+    private boolean isAtEndYear() {
+        return endDate != null
+                && selectedDate.get(Calendar.YEAR) == endDate.get(Calendar.YEAR);
+    }
+
+    private boolean isAtEndYearAndMonth() {
+        return endDate != null
+                && selectedDate.get(Calendar.YEAR) == endDate.get(Calendar.YEAR)
+                && selectedDate.get(Calendar.MONTH) == endDate.get(Calendar.MONTH);
+    }
+
+    private boolean isAtEndDate() {
+        return endDate != null
+                && selectedDate.get(Calendar.YEAR) == endDate.get(Calendar.YEAR)
+                && selectedDate.get(Calendar.DAY_OF_YEAR) == endDate.get(Calendar.DAY_OF_YEAR);
+    }
+
+    private boolean isAtEndDateAndHour() {
+        return endDate != null
+                && selectedDate.get(Calendar.YEAR) == endDate.get(Calendar.YEAR)
+                && selectedDate.get(Calendar.DAY_OF_YEAR) == endDate.get(Calendar.DAY_OF_YEAR)
+                && selectedDate.get(Calendar.HOUR_OF_DAY) == endDate.get(Calendar.HOUR_OF_DAY);
     }
 
     private void runIfNotNull(Runnable runnable, Object... objects) {

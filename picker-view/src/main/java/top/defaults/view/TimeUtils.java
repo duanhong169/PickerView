@@ -106,19 +106,19 @@ class TimeUtils {
         return (hours * 60 + minutes) / minutesInterval;
     }
 
-    static int calculateStep(Calendar startDate, Calendar selectedDate, int minutesInterval) {
+    static int calculateStep(Calendar startDate, Calendar toDate, int minutesInterval) {
         int hours;
         int minutes;
-        if (isAtStartDay(startDate, selectedDate)) {
-            hours = selectedDate.get(Calendar.HOUR_OF_DAY) - startDate.get(Calendar.HOUR_OF_DAY);
+        if (isAtStartDay(startDate, toDate)) {
+            hours = toDate.get(Calendar.HOUR_OF_DAY) - startDate.get(Calendar.HOUR_OF_DAY);
             if (hours == 0) {
-                minutes = selectedDate.get(Calendar.MINUTE) - startDate.get(Calendar.MINUTE);
+                minutes = toDate.get(Calendar.MINUTE) - startDate.get(Calendar.MINUTE);
             } else  {
-                minutes = selectedDate.get(Calendar.MINUTE);
+                minutes = toDate.get(Calendar.MINUTE);
             }
         } else {
-            hours = selectedDate.get(Calendar.HOUR_OF_DAY);
-            minutes = selectedDate.get(Calendar.MINUTE);
+            hours = toDate.get(Calendar.HOUR_OF_DAY);
+            minutes = toDate.get(Calendar.MINUTE);
         }
         return (hours * 60 + minutes) / minutesInterval;
     }
