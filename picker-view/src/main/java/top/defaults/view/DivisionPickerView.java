@@ -1,6 +1,7 @@
 package top.defaults.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import java.util.List;
@@ -15,6 +16,10 @@ public class DivisionPickerView extends PickerViewGroup {
     private PickerView cityPicker;
     private PickerView divisionPicker;
 
+    public static final int TYPE_ALL = 0;
+    public static final int TYPE_PROVINCE_AND_CITY = 1;
+    private int type = TYPE_ALL;
+
     public DivisionPickerView(Context context) {
         this(context, null);
     }
@@ -25,13 +30,34 @@ public class DivisionPickerView extends PickerViewGroup {
 
     public DivisionPickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        provincePicker = new PickerView(context);
-        cityPicker = new PickerView(context);
-        divisionPicker = new PickerView(context);
 
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.DivisionPickerView);
+        type = typedArray.getInt(R.styleable.DivisionPickerView_divisionPickerType, TYPE_ALL);
+        typedArray.recycle();
+
+        provincePicker = new PickerView(context);
         settlePickerView(provincePicker);
+
+        cityPicker = new PickerView(context);
         settlePickerView(cityPicker);
+
+        divisionPicker = new PickerView(context);
         settlePickerView(divisionPicker);
+
+        configure();
+    }
+
+    public void setType(int type) {
+        this.type = type;
+        configure();
+    }
+
+    private void configure() {
+        if (type == TYPE_PROVINCE_AND_CITY) {
+            divisionPicker.setVisibility(GONE);
+        } else {
+            divisionPicker.setVisibility(VISIBLE);
+        }
     }
 
     public interface OnSelectedDivisionChangedListener {
@@ -93,7 +119,10 @@ public class DivisionPickerView extends PickerViewGroup {
     }
 
     public Division getSelectedDivision() {
-        Division division = divisionPicker.getSelectedItem(Division.class);
+        Division division = null;
+        if (type == TYPE_ALL) {
+            division = divisionPicker.getSelectedItem(Division.class);
+        }
         if (division == null) {
             division = cityPicker.getSelectedItem(Division.class);
         }

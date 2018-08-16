@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:preferredMaxOffsetItemCount="4"
+        app:divisionPickerType="provinceAndCity"
         android:background="#e7e7e7"/>
 
     <TextView
@@ -21,5 +22,12 @@
         android:layout_height="wrap_content"
         android:textColor="@color/colorAccent"
         android:gravity="center"/>
+
+    <ToggleButton
+        android:id="@+id/toggleType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOn="省市区"
+        android:textOff="省市"/>
 
 </LinearLayout>

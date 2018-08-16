@@ -8,6 +8,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import top.defaults.view.Division;
 import top.defaults.view.DivisionPickerView;
 
@@ -15,6 +16,10 @@ public class DivisionPickerActivity extends AppCompatActivity {
 
     @BindView(R.id.divisionPicker) DivisionPickerView divisionPicker;
     @BindView(R.id.textView) TextView textView;
+    @OnCheckedChanged(R.id.toggleType)
+    void toggleType(boolean isChecked) {
+        divisionPicker.setType(isChecked ? DivisionPickerView.TYPE_ALL : DivisionPickerView.TYPE_PROVINCE_AND_CITY);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

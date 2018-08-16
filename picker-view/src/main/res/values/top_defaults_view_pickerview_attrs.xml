@@ -43,4 +43,11 @@
             <enum name="thirty" value="30"/>
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="DivisionPickerView">
+        <attr name="divisionPickerType" format="enum">
+            <enum name="all" value="0"/>
+            <enum name="provinceAndCity" value="1"/>
+        </attr>
+    </declare-styleable>
 </resources>
