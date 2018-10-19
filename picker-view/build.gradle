@@ -9,7 +9,7 @@ ext {
 
     libraryName = 'PickerView'
     libraryDescription = 'A view for picking data on Android'
-    libraryVersion = '1.0.0'
+    libraryVersion = '1.0.1'
 
     gitUrl = 'https://github.com/duanhong169/PickerView.git'
     siteUrl = 'https://github.com/duanhong169/PickerView'
