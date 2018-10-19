@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.text.Layout;
@@ -61,6 +62,7 @@ public class PickerView extends View {
     private int itemHeight;
     private int textSize;
     private int textColor = Color.BLACK;
+    private Typeface typeface;
     private boolean isCyclic;
     private boolean autoFitSize;
     private boolean curved;
@@ -294,6 +296,14 @@ public class PickerView extends View {
         }
     }
 
+    public void setTypeface(Typeface typeface) {
+        if (this.typeface != typeface) {
+            this.typeface = typeface;
+            textPaint.setTypeface(typeface);
+            invalidate();
+        }
+    }
+
     public void setCyclic(boolean cyclic) {
         if (this.isCyclic != cyclic) {
             isCyclic = cyclic;
@@ -331,7 +341,7 @@ public class PickerView extends View {
         checkNotNull(adapter, "adapter must be set first");
 
         PickerItem item = adapter.getItem(getSelectedItemPosition());
-        if (item == null || !cls.isInstance(item)) {
+        if (!cls.isInstance(item)) {
             return null;
         }
 
